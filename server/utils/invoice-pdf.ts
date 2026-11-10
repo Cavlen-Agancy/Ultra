@@ -46,8 +46,8 @@ export interface InvoicePdfData {
   }
 }
 
-const PRIMARY = '#111111'
-const ACCENT_YELLOW = '#737373'
+const PRIMARY = '#000000'
+const ACCENT_RED = '#D2312D'
 const BORDER_COLOR = '#e0e0e0'
 const ZEBRA_BG = '#f9f9f9'
 
@@ -220,13 +220,13 @@ export async function generateInvoicePdf(data: InvoicePdfData): Promise<Buffer> 
         margin: [0, 6, 0, 6],
       }
 
-  // ── Gold rule under the header (brand correspondence system, p.28) ──
+  // ── Ultra red rule under the header (brand correspondence system, p.28) ──
   const goldRule: any = {
-    canvas: [{ type: 'line', x1: 0, y1: 0, x2: 523, y2: 0, lineWidth: 3, lineColor: ACCENT_YELLOW }],
+    canvas: [{ type: 'line', x1: 0, y1: 0, x2: 523, y2: 0, lineWidth: 3, lineColor: ACCENT_RED }],
     margin: [0, 0, 0, 0],
   }
 
-  // ── Horizontal divider line (#111111, full width) below the title ──
+  // ── Horizontal divider line (#000000, full width) below the title ──
   const divider: any = {
     canvas: [{ type: 'line', x1: 0, y1: 0, x2: 523, y2: 0, lineWidth: 2, lineColor: PRIMARY }],
     margin: [0, 0, 0, 10],
@@ -264,7 +264,7 @@ export async function generateInvoicePdf(data: InvoicePdfData): Promise<Buffer> 
   }
 
   // ── Items Table: Columns (RTL order): م | البيان | الكمية | سعر الوحدة | الإجمالي ──
-  // Header row: #111111 background, white text, bold, centered
+  // Header row: #000000 background, white text, bold, centered
   // Data rows: 10 rows minimum (empty rows shown as blank lines if fewer items)
   // Alternating row bg: white / very light gray #f9f9f9
   // All borders: 1px solid #e0e0e0
@@ -324,7 +324,7 @@ export async function generateInvoicePdf(data: InvoicePdfData): Promise<Buffer> 
   // - الإجمالي: ........
   // - خصم: ........
   // - ضريبة القيمة المضافة: ........
-  // - الصافي المستحق: [gold #737373 background, bold, larger text]
+  // - الصافي المستحق: [red #D2312D background, bold, larger text]
   const totalsBox: any = {
     table: {
       widths: [135, 95],
@@ -352,7 +352,7 @@ export async function generateInvoicePdf(data: InvoicePdfData): Promise<Buffer> 
       vLineWidth: () => 1,
       hLineColor: () => BORDER_COLOR,
       vLineColor: () => BORDER_COLOR,
-      fillColor: (rowIndex: number) => (rowIndex === 3 ? ACCENT_YELLOW : null),
+      fillColor: (rowIndex: number) => (rowIndex === 3 ? ACCENT_RED : null),
       paddingLeft: () => 8,
       paddingRight: () => 8,
       paddingTop: () => 5,

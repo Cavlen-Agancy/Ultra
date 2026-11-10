@@ -44,6 +44,15 @@ const isBarVisible = computed(() => {
 
 const currentItem = computed(() => activeItems.value[currentIndex.value] || null)
 
+const isLightBar = computed(() => {
+  const hex = String(data.value?.bgColor || "#000000").replace("#", "")
+  if (!/^[0-9a-fA-F]{6}$/.test(hex)) return false
+  const r = parseInt(hex.slice(0, 2), 16) / 255
+  const g = parseInt(hex.slice(2, 4), 16) / 255
+  const b = parseInt(hex.slice(4, 6), 16) / 255
+  return (0.2126 * r + 0.7152 * g + 0.0722 * b) > 0.55
+})
+
 function textOf(item: AnnouncementItem | null) {
   if (!item) return ''
   return locale.value === 'ar' ? item.textAr : (item.textEn || item.textAr)
@@ -114,8 +123,9 @@ function onTouchEnd(e: TouchEvent) {
   <div
     v-if="isBarVisible"
     data-site-announce
-    class="relative z-50 flex h-10 w-full items-center justify-between bg-[#737373] px-3 text-xs font-semibold text-[#111111] transition-colors print:hidden"
-    :style="{ backgroundColor: data?.bgColor || '#737373' }"
+    :class="isLightBar ? 'text-black' : 'text-white'"
+    class="relative z-50 flex h-9 w-full items-center justify-between px-3 text-[11px] font-medium tracking-wide transition-colors print:hidden"
+    :style="{ backgroundColor: data?.bgColor || '#000000' }"
     @mouseenter="stopTimer"
     @mouseleave="startTimer"
     @touchstart="onTouchStart"
@@ -126,7 +136,7 @@ function onTouchEnd(e: TouchEvent) {
       <button
         v-if="activeItems.length > 1"
         type="button"
-        class="hidden sm:flex h-7 w-7 items-center justify-center rounded text-[#111111]/70 hover:bg-[#111111]/10 hover:text-[#111111] active:scale-95 transition-all"
+        class="hidden sm:flex h-7 w-7 items-center justify-center opacity-60 transition-opacity hover:opacity-100"
         :aria-label="locale === 'ar' ? 'السابق' : 'Previous'"
         @click="prev"
       >
@@ -188,7 +198,7 @@ function onTouchEnd(e: TouchEvent) {
           :key="i"
           type="button"
           class="h-1.5 rounded-full transition-all"
-          :class="i === currentIndex ? 'w-3.5 bg-[#111111]' : 'w-1.5 bg-[#111111]/40 hover:bg-[#111111]/70'"
+          :class="i === currentIndex ? 'w-4 bg-ultra-500' : 'w-1.5 bg-current opacity-30 hover:opacity-60'"
           :aria-label="`Go to slide ${i + 1}`"
           @click="goTo(i)"
         />
@@ -198,7 +208,7 @@ function onTouchEnd(e: TouchEvent) {
       <button
         v-if="activeItems.length > 1"
         type="button"
-        class="hidden sm:flex h-7 w-7 items-center justify-center rounded text-[#111111]/70 hover:bg-[#111111]/10 hover:text-[#111111] active:scale-95 transition-all"
+        class="hidden sm:flex h-7 w-7 items-center justify-center opacity-60 transition-opacity hover:opacity-100"
         :aria-label="locale === 'ar' ? 'التالي' : 'Next'"
         @click="next"
       >
@@ -208,8 +218,9 @@ function onTouchEnd(e: TouchEvent) {
       <!-- Dismiss (×) Button -->
       <button
         type="button"
-        class="flex h-7 w-7 items-center justify-center rounded text-[#111111]/70 hover:bg-[#111111]/10 hover:text-[#111111] transition-all active:scale-90 ms-1"
+        class="flex h-7 w-7 items-center justify-center rounded p-1 opacity-60 transition-opacity hover:opacity-100 ms-1"
         :title="locale === 'ar' ? 'إغلاق الإشعار' : 'Close'"
+        :aria-label="locale === 'ar' ? 'إغلاق الإشعار' : 'Close announcement'"
         @click="dismiss"
       >
         <X class="h-4 w-4" />

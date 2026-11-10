@@ -1,19 +1,12 @@
 <script setup lang="ts">
-import { 
-  Check, 
-  CheckCircle2, 
-  Copy, 
-  Cpu, 
-  Download, 
-  FileText, 
-  Minus, 
-  Play, 
-  Plus, 
-  Share2, 
-  ShieldCheck, 
-  ShoppingCart, 
-  Truck, 
-  Video 
+import {
+  Check,
+  Copy,
+  Download,
+  FileText,
+  Minus,
+  Plus,
+  ShoppingCart,
 } from 'lucide-vue-next'
 
 const { t, locale } = useI18n()
@@ -171,276 +164,147 @@ function getEmbedUrl(url: string, type?: string): string {
   return url
 }
 </script>
-
 <template>
-  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-    
-    <!-- Breadcrumb Trail -->
-    <nav class="mb-6 flex flex-wrap items-center gap-1.5 text-xs font-medium text-muted" aria-label="Breadcrumb">
-      <NuxtLink :to="localePath('/')" class="hover:text-primary transition-colors">{{ t('nav.home') }}</NuxtLink>
-      <span class="text-muted">/</span>
-      <NuxtLink :to="localePath('/products')" class="hover:text-primary transition-colors">{{ t('products.title') }}</NuxtLink>
-      <span class="text-muted">/</span>
-      <NuxtLink :to="localePath(`/products/${p.category.slug}`)" class="hover:text-primary transition-colors">
-        {{ locale === 'ar' ? p.category.nameAr : p.category.nameEn }}
-      </NuxtLink>
-      <span class="text-muted">/</span>
-      <span class="text-text font-semibold truncate max-w-xs">{{ name }}</span>
-    </nav>
+  <div class="bg-white text-black">
+    <div class="container-editorial py-6 sm:py-10">
+      <nav class="flex flex-wrap items-center gap-2 text-[11px] font-medium uppercase tracking-[0.12em] text-black/60" aria-label="Breadcrumb">
+        <NuxtLink :to="localePath('/')" class="transition-colors hover:text-black">{{ t('nav.home') }}</NuxtLink>
+        <span aria-hidden="true">/</span>
+        <NuxtLink :to="localePath('/products')" class="transition-colors hover:text-black">{{ t('products.title') }}</NuxtLink>
+        <span aria-hidden="true">/</span>
+        <NuxtLink :to="localePath(`/products/${p.category.slug}`)" class="transition-colors hover:text-black">
+          {{ locale === 'ar' ? p.category.nameAr : p.category.nameEn }}
+        </NuxtLink>
+        <span aria-hidden="true">/</span>
+        <span class="truncate text-black" aria-current="page">{{ name }}</span>
+      </nav>
+    </div>
 
-    <!-- Main Product Showcase Grid -->
-    <div class="grid gap-10 lg:grid-cols-12 lg:gap-14">
-      
-      <!-- Gallery Column (5 cols) -->
-      <div class="lg:col-span-5 space-y-4">
-        <!-- Main Image Box -->
-        <div 
-          class="aspect-square w-full overflow-hidden rounded-2xl border border-border bg-bg p-3 shadow-xs"
-          :style="{ borderColor: 'var(--color-border)' }"
-        >
-          <div class="relative h-full w-full overflow-hidden rounded-xl bg-surface flex items-center justify-center">
-            <img 
-              v-if="p.images[activeImage]" 
-              :src="p.images[activeImage]!.path" 
-              :alt="name" 
-              class="h-full w-full object-contain p-2" 
-            />
-            <div v-else class="text-xs text-muted">
-              {{ t('common.noImage') }}
-            </div>
-            <span
-              v-if="discountPercent > 0"
-              class="absolute left-[10px] top-[10px] inline-flex items-center rounded-full bg-error px-[10px] py-[4px] text-[12px] font-bold text-white shadow-xs"
-              style="border-radius: 20px;"
-            >
-              {{ locale === 'ar' ? `خصم ${discountPercent}%` : `${discountPercent}% OFF` }}
-            </span>
+    <div class="container-editorial grid gap-10 pb-16 lg:grid-cols-12 lg:gap-14 lg:pb-24">
+      <div class="lg:col-span-7">
+        <div class="relative aspect-square overflow-hidden bg-[#F7F7F7]">
+          <img
+            v-if="p.images[activeImage]"
+            :src="p.images[activeImage]!.path"
+            :alt="name"
+            class="h-full w-full object-contain p-5 sm:p-8"
+          />
+          <div v-else class="flex h-full w-full items-center justify-center text-sm text-black/30">
+            {{ t('common.noImage') }}
           </div>
+          <span
+            v-if="discountPercent > 0"
+            class="absolute start-4 top-4 bg-ultra-500 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-white"
+          >
+            {{ locale === 'ar' ? `خصم ${discountPercent}%` : `-${discountPercent}%` }}
+          </span>
         </div>
 
-        <!-- Thumbnails Strip -->
-        <div v-if="p.images.length > 1" class="grid grid-cols-5 gap-2.5">
+        <div v-if="p.images.length > 1" class="mt-3 grid grid-cols-5 gap-2 sm:gap-3">
           <button
             v-for="(img, i) in p.images"
             :key="img.path"
             type="button"
-            class="aspect-square overflow-hidden rounded-xl border p-1 transition-all active:scale-95"
-            :class="i === activeImage ? 'border-primary ring-2 ring-primary/20 bg-surface' : 'border-border bg-surface'"
+            class="aspect-square overflow-hidden border bg-[#F7F7F7] p-1.5 transition-colors"
+            :class="i === activeImage ? 'border-black' : 'border-transparent hover:border-black/25'"
+            :aria-label="`${name} ${i + 1}`"
+            :aria-current="i === activeImage ? 'true' : undefined"
             @click="activeImage = i"
           >
-            <img :src="img.path" :alt="`${name} ${i + 1}`" class="h-full w-full object-cover rounded-lg" loading="lazy" />
+            <img :src="img.path" :alt="`${name} ${i + 1}`" class="h-full w-full object-contain" loading="lazy" />
           </button>
         </div>
 
-        <!-- Product Video Section (if attached) -->
-        <div v-if="p.video" class="mt-5 rounded-2xl border border-border overflow-hidden bg-bg shadow-xs">
-          <div class="px-3.5 py-2.5 bg-surface border-b border-border flex items-center gap-2 text-xs font-bold text-text">
-            <Play class="h-3.5 w-3.5 text-cream fill-current" />
-            <span>{{ locale === 'ar' ? 'فيديو توضيحي للمنتج' : 'Product Demonstration Video' }}</span>
-          </div>
-          <div class="relative aspect-video w-full bg-black">
+        <div v-if="p.video" class="mt-8">
+          <p class="eyebrow">{{ locale === 'ar' ? 'فيديو المنتج' : 'Product video' }}</p>
+          <div class="mt-3 aspect-video w-full bg-black">
             <iframe
               v-if="p.video.type === 'youtube' || p.video.type === 'vimeo'"
               :src="getEmbedUrl(p.video.url, p.video.type)"
               class="h-full w-full"
               allowfullscreen
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            ></iframe>
-            <video
-              v-else
-              controls
-              :src="p.video.url"
-              class="h-full w-full object-cover"
-            ></video>
+            />
+            <video v-else controls :src="p.video.url" class="h-full w-full object-cover" />
           </div>
         </div>
       </div>
 
-      <!-- Details Column (7 cols) -->
-      <div class="lg:col-span-7 flex flex-col justify-between">
-        <div>
-          <!-- Category Chip -->
-          <NuxtLink 
-            :to="localePath(`/products/${p.category.slug}`)"
-            class="inline-block rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-primary hover:bg-primary/20 transition-colors mb-3"
-          >
+      <div class="lg:col-span-5">
+        <div class="lg:sticky lg:top-24">
+          <NuxtLink :to="localePath(`/products/${p.category.slug}`)" class="eyebrow !text-ultra-600 hover:underline">
             {{ locale === 'ar' ? p.category.nameAr : p.category.nameEn }}
           </NuxtLink>
 
-          <!-- Product Title -->
-          <h1 class="font-heading text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-text leading-tight mb-4">
+          <h1 class="mt-3 font-heading text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">
             {{ name }}
           </h1>
 
-          <!-- Price Display -->
-          <div class="flex flex-wrap items-center gap-3 mb-6 pb-6 border-b border-border">
-            <span class="text-3xl sm:text-4xl font-black text-primary">
-              {{ money(p.price) }}
-            </span>
-            <span 
-              v-if="p.compareAtPrice" 
-              class="text-base sm:text-lg text-muted line-through"
-            >
-              {{ money(p.compareAtPrice) }}
-            </span>
-            <span
-              v-if="discountPercent > 0"
-              class="inline-flex items-center rounded-full bg-error/10 border border-error/30 px-3 py-1.5 text-sm font-bold text-error"
-              style="border-radius: 20px;"
-            >
-              {{ locale === 'ar' ? `وفّر ${discountPercent}%` : `Save ${discountPercent}%` }}
-            </span>
+          <div class="mt-5 flex flex-wrap items-baseline gap-3">
+            <span class="text-xl font-semibold text-black sm:text-2xl">{{ money(p.price) }}</span>
+            <span v-if="p.compareAtPrice" class="text-sm text-black/55 line-through">{{ money(p.compareAtPrice) }}</span>
           </div>
-          <p class="mb-6 -mt-4 text-xs text-muted">
-            {{ locale === 'ar' ? 'شامل ضريبة القيمة المضافة' : 'VAT included' }}
-          </p>
 
-          <!-- Description (Change 9: Rich content rendering) -->
-          <div
-            v-if="desc"
-            class="flow-root text-sm sm:text-base leading-relaxed text-muted mb-8 max-w-2xl prose prose-slate [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-xl [&_figure]:my-4 [&_figcaption]:text-xs [&_figcaption]:text-muted [&_figcaption]:italic [&_figcaption]:text-center"
-            v-html="desc"
-          />
+          <div v-if="desc" class="mt-7 border-t border-black/10 pt-6 text-sm leading-7 text-black/65 [&_figure]:my-5 [&_figcaption]:mt-2 [&_figcaption]:text-xs [&_figcaption]:text-black/55 [&_img]:h-auto [&_img]:max-w-full" v-html="desc" />
 
-          <!-- Purchasing Actions -->
-          <div class="space-y-4 mb-8">
+          <div class="mt-8 border-t border-black/10 pt-6">
             <div class="flex flex-wrap items-center gap-3">
-              <!-- Quantity Stepper -->
-              <div class="flex h-12 items-center rounded-xl border border-border bg-surface px-2">
-                <button
-                  type="button"
-                  class="flex h-8 w-8 items-center justify-center rounded-lg text-muted hover:bg-border transition-colors"
-                  :aria-label="locale === 'ar' ? 'تقليل الكمية' : 'Decrease quantity'"
-                  @click="updateQty(-1)"
-                >
-                  <Minus class="h-3.5 w-3.5" />
+              <div class="flex h-12 items-center border border-black/20">
+                <button type="button" class="flex h-11 w-11 items-center justify-center text-black/60 hover:text-black" :aria-label="locale === 'ar' ? 'تقليل الكمية' : 'Decrease quantity'" @click="updateQty(-1)">
+                  <Minus class="h-4 w-4" aria-hidden="true" />
                 </button>
-                <span class="w-10 text-center font-mono text-sm font-bold text-text">
-                  {{ quantity }}
-                </span>
-                <button
-                  type="button"
-                  class="flex h-8 w-8 items-center justify-center rounded-lg text-muted hover:bg-border transition-colors"
-                  :aria-label="locale === 'ar' ? 'زيادة الكمية' : 'Increase quantity'"
-                  @click="updateQty(1)"
-                >
-                  <Plus class="h-3.5 w-3.5" />
+                <span class="w-9 text-center font-mono text-sm font-semibold text-black">{{ quantity }}</span>
+                <button type="button" class="flex h-11 w-11 items-center justify-center text-black/60 hover:text-black" :aria-label="locale === 'ar' ? 'زيادة الكمية' : 'Increase quantity'" @click="updateQty(1)">
+                  <Plus class="h-4 w-4" aria-hidden="true" />
                 </button>
               </div>
 
-              <!-- Add to Cart Primary CTA -->
-              <button 
-                type="button" 
-                class="flex-1 min-w-[200px] h-12 inline-flex items-center justify-center gap-2 rounded-full text-sm font-bold shadow-gold active:scale-[0.98] transition-all"
-                :class="added ? 'bg-emerald-600 text-white' : 'bg-gold-gradient hover:brightness-105 text-ink-950'"
+              <button
+                type="button"
+                class="inline-flex min-h-12 flex-1 items-center justify-center gap-2 px-6 text-sm font-semibold text-white transition-colors"
+                :class="added ? 'bg-black' : 'bg-ultra-500 hover:bg-ultra-600'"
                 @click="handleAddToCart"
               >
-                <Check v-if="added" class="h-4 w-4" />
-                <ShoppingCart v-else class="h-4 w-4" />
-                <span>{{ added ? (locale === 'ar' ? 'تمت الإضافة للسلة' : 'Added to Cart') : (locale === 'ar' ? 'إضافة إلى السلة' : 'Add to Cart') }}</span>
+                <Check v-if="added" class="h-4 w-4" aria-hidden="true" />
+                <ShoppingCart v-else class="h-4 w-4" aria-hidden="true" />
+                <span>{{ added ? (locale === 'ar' ? 'تمت الإضافة للسلة' : 'Added to cart') : (locale === 'ar' ? 'إضافة إلى السلة' : 'Add to cart') }}</span>
               </button>
             </div>
 
-            <!-- Secondary Sharing Actions -->
-            <div class="flex flex-wrap items-center gap-2.5 pt-2">
-              <a 
-                :href="waHref" 
-                target="_blank" 
-                rel="noopener" 
-                class="inline-flex h-10 items-center gap-2 rounded-xl border border-border bg-surface px-4 text-xs font-semibold text-muted hover:border-emerald-500 hover:text-emerald-600 transition-colors"
-              >
-                <IconWhatsApp class="h-3.5 w-3.5 text-emerald-500" />
-                <span>{{ t('products.shareWhatsApp') }}</span>
-              </a>
-
-              <button 
-                type="button" 
-                class="inline-flex h-10 items-center gap-2 rounded-xl border border-border bg-surface px-4 text-xs font-semibold text-muted hover:bg-border/40 transition-colors" 
-                @click="copyLink"
-              >
-                <Check v-if="copied" class="h-3.5 w-3.5 text-emerald-500" />
-                <Copy v-else class="h-3.5 w-3.5 text-muted" />
-                <span>{{ copied ? (locale === 'ar' ? 'تم نسخ الرابط' : 'Link Copied') : (locale === 'ar' ? 'نسخ الرابط' : 'Copy Link') }}</span>
+            <div class="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-black/60">
+              <a :href="waHref" target="_blank" rel="noopener" class="transition-colors hover:text-black">{{ locale === 'ar' ? 'مشاركة واتساب' : 'Share on WhatsApp' }}</a>
+              <button type="button" class="transition-colors hover:text-black" @click="copyLink">
+                {{ copied ? (locale === 'ar' ? 'تم نسخ الرابط' : 'Link copied') : (locale === 'ar' ? 'نسخ الرابط' : 'Copy link') }}
               </button>
             </div>
           </div>
 
-          <!-- Product Confidence Strip -->
-          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 rounded-xl border border-border bg-surface/70 p-4 text-xs text-muted mb-8">
-            <div class="flex items-center gap-2">
-              <ShieldCheck class="h-4 w-4 text-primary shrink-0" />
-              <span>{{ locale === 'ar' ? 'أصلي ومضمون 100%' : '100% Genuine Part' }}</span>
-            </div>
-            <div class="flex items-center gap-2">
-              <Truck class="h-4 w-4 text-primary shrink-0" />
-              <span>{{ locale === 'ar' ? 'شحن سريع بالمحافظات' : 'Fast Regional Dispatch' }}</span>
-            </div>
-            <div class="flex items-center gap-2 col-span-2 sm:col-span-1">
-              <FileText class="h-4 w-4 text-primary shrink-0" />
-              <span>{{ locale === 'ar' ? 'كتيب بيانات معتمد' : 'Verified Datasheet' }}</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Technical Specifications Cards -->
-        <div v-if="p.attributes?.length" class="border-t border-border pt-8">
-          <h2 class="font-heading text-lg font-bold text-text mb-4">
-            {{ t('products.specs') }}
-          </h2>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div 
-              v-for="a in p.attributes" 
-              :key="a.keyEn"
-              class="rounded-xl border border-border bg-bg p-3.5 shadow-xs"
-            >
-              <span class="block text-[11px] font-semibold text-muted mb-1">
-                {{ locale === 'ar' ? a.keyAr : a.keyEn }}
-              </span>
-              <span class="font-mono text-xs font-bold text-text">
-                {{ locale === 'ar' ? a.valueAr : a.valueEn }}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Product Documents & Datasheets (PDF) Section -->
-        <div v-if="p.documents?.length" class="border-t border-border pt-8 mt-8">
-          <div class="flex items-center gap-2 mb-4">
-              <FileText class="h-5 w-5 text-primary" />
-            <h2 class="font-heading text-lg font-bold text-text">
-              {{ locale === 'ar' ? 'كتيبات المواصفات والملفات الفنية (PDF)' : 'Technical Datasheets & Documentation (PDF)' }}
-            </h2>
-          </div>
-
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <a
-              v-for="doc in p.documents"
-              :key="doc.id"
-              :href="doc.filePath"
-              target="_blank"
-              download
-              class="group flex items-center justify-between rounded-xl border border-border bg-bg p-3.5 shadow-xs hover:border-primary hover:shadow-md transition-all"
-            >
-              <div class="flex items-center gap-3 min-w-0">
-                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-rose-50 text-rose-600 font-bold text-xs uppercase">
-                  PDF
-                </div>
-                <div class="min-w-0">
-                  <p class="font-bold text-xs sm:text-sm text-text truncate group-hover:text-primary transition-colors">
-                    {{ locale === 'ar' ? doc.labelAr : doc.labelEn }}
-                  </p>
-                  <span class="text-[10px] text-muted font-mono block">
-                    {{ locale === 'ar' ? 'تحميل المستند' : 'Download Document' }}
-                  </span>
-                </div>
+          <div v-if="p.attributes?.length" class="mt-10 border-t border-black/10 pt-6">
+            <h2 class="eyebrow">{{ t('products.specs') }}</h2>
+            <dl class="mt-4 divide-y divide-black/10">
+              <div v-for="a in p.attributes" :key="a.keyEn" class="grid grid-cols-2 gap-4 py-2.5 text-sm">
+                <dt class="text-black/60">{{ locale === 'ar' ? a.keyAr : a.keyEn }}</dt>
+                <dd class="text-end font-medium text-black">{{ locale === 'ar' ? a.valueAr : a.valueEn }}</dd>
               </div>
+            </dl>
+          </div>
 
-              <Download class="h-4 w-4 text-muted group-hover:text-primary transition-colors shrink-0" />
-            </a>
+          <div v-if="p.documents?.length" class="mt-10 border-t border-black/10 pt-6">
+            <h2 class="eyebrow">{{ locale === 'ar' ? 'الملفات' : 'Documents' }}</h2>
+            <ul class="mt-3 divide-y divide-black/10">
+              <li v-for="doc in p.documents" :key="doc.id">
+                <a :href="doc.filePath" target="_blank" download class="flex items-center justify-between gap-4 py-3 text-sm text-black/70 transition-colors hover:text-black">
+                  <span class="flex min-w-0 items-center gap-2">
+                    <FileText class="h-4 w-4 shrink-0 text-black/55" aria-hidden="true" />
+                    <span class="truncate">{{ locale === 'ar' ? doc.labelAr : doc.labelEn }}</span>
+                  </span>
+                  <Download class="h-4 w-4 shrink-0 text-black/35" aria-hidden="true" />
+                </a>
+              </li>
+            </ul>
           </div>
         </div>
       </div>
-
     </div>
   </div>
 </template>

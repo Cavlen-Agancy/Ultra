@@ -81,12 +81,12 @@ async function submitOrder() {
   }
 }
 
-const inputCls = 'h-11 w-full rounded-xl border border-border bg-surface px-3.5 text-xs sm:text-sm text-text placeholder:text-muted focus:border-primary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary/20 transition-colors'
+const inputCls = 'h-11 w-full border border-black/20 bg-white px-3 text-sm text-black placeholder:text-black/35 focus:border-black focus:outline-none transition-colors'
 </script>
 
 <template>
-  <div class="py-12 sm:py-16 px-4 sm:px-6">
-    <div class="mx-auto w-full max-w-[600px]">
+  <div class="py-10 sm:py-16">
+    <div class="container-editorial mx-auto w-full max-w-[720px]">
       
       <!-- Bilingual Page Title Directly Above Card -->
       <div class="mb-6 text-center">
@@ -102,17 +102,20 @@ const inputCls = 'h-11 w-full rounded-xl border border-border bg-surface px-3.5 
         </div>
       </div>
 
+      <div v-if="p.images?.[0]?.path" class="mb-6 aspect-[4/3] overflow-hidden bg-[#F7F7F7]">
+        <img :src="p.images[0].path" :alt="p.nameEn" class="h-full w-full object-contain p-6" />
+      </div>
+
       <!-- Centered Card with Form (max-width 600px) -->
       <div 
-        class="rounded-2xl border border-border bg-bg p-6 sm:p-8 shadow-sm transition-colors"
-        :style="{ borderColor: 'var(--color-border)' }"
-        dir="rtl"
+        class="border border-black/10 bg-white p-6 sm:p-8"
+        :dir="locale === 'ar' ? 'rtl' : 'ltr'"
       >
         <!-- Error Alert -->
         <div 
           v-if="formError" 
           role="alert" 
-          class="mb-6 flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-xs sm:text-sm font-medium text-rose-700"
+          class="mb-6 flex items-center gap-2 rounded-xl border border-ultra-200 bg-ultra-50 px-4 py-3 text-xs sm:text-sm font-medium text-ultra-700"
         >
           <AlertCircle class="h-4 w-4 shrink-0" />
           <span>{{ formError }}</span>
@@ -144,7 +147,7 @@ const inputCls = 'h-11 w-full rounded-xl border border-border bg-surface px-3.5 
               type="tel"
               required
               dir="ltr"
-              placeholder="05xxxxxxxx"
+              placeholder="Phone number"
               :class="inputCls"
               :style="{ borderColor: 'var(--color-border)' }"
             />
@@ -221,7 +224,7 @@ const inputCls = 'h-11 w-full rounded-xl border border-border bg-surface px-3.5 
             <input
               v-model="form.notes"
               type="text"
-              placeholder="Any special instructions..."
+              placeholder="Optional order note"
               :class="inputCls"
               :style="{ borderColor: 'var(--color-border)' }"
             />
@@ -232,7 +235,7 @@ const inputCls = 'h-11 w-full rounded-xl border border-border bg-surface px-3.5 
             <button 
               type="submit" 
               :disabled="loading" 
-              class="inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-gold-gradient px-6 text-sm font-bold text-ink-950 shadow-gold hover:brightness-105 active:scale-[0.99] disabled:opacity-50 transition-all cursor-pointer"
+              class="btn-primary h-12 w-full disabled:opacity-50"
             >
               <ShoppingBag class="h-4 w-4" />
               <span>{{ loading ? 'جاري إرسال الطلب… / Submitting…' : 'إرسال الطلب / Submit Request' }}</span>

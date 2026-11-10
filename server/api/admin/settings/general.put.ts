@@ -16,7 +16,7 @@ export default defineEventHandler(async (event) => {
   }
   const HEX_RE = /^#[0-9a-fA-F]{6}$/
   const colorUpdate: Record<string, string> = {}
-  for (const [key, fallback] of [['primaryDarkColor', '#111111'], ['primaryColor', '#111111'], ['accentColor', '#737373']] as const) {
+  for (const [key, fallback] of [['primaryDarkColor', '#000000'], ['primaryColor', '#000000'], ['accentColor', '#D2312D']] as const) {
     if (body[key] === undefined) continue
     const val = String(body[key]).trim()
     if (!HEX_RE.test(val)) {

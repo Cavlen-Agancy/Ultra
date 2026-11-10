@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ArrowRight, ChevronDown, ChevronUp, Filter, RotateCcw, Search, SlidersHorizontal, Tag, X } from 'lucide-vue-next'
+import { ChevronDown, ChevronUp, RotateCcw, Search, SlidersHorizontal, X } from 'lucide-vue-next'
 
 const props = defineProps<{ 
   categorySlug?: string
@@ -17,6 +17,14 @@ const maxPrice = ref(String(route.query.maxPrice || ''))
 const sort = ref(String(route.query.sort || ''))
 const page = ref(Number(route.query.page) || 1)
 const mobileFilters = ref(false)
+
+watch(mobileFilters, (open) => {
+  if (typeof document !== 'undefined') document.body.classList.toggle('overflow-hidden', open)
+})
+
+onBeforeUnmount(() => {
+  if (typeof document !== 'undefined') document.body.classList.remove('overflow-hidden')
+})
 
 // Dynamic multi-attribute selections: { [key: string]: string[] }
 const selectedAttributes = ref<Record<string, string[]>>({})
@@ -209,42 +217,31 @@ watch(() => route.query, (newQ) => {
   initAttributesFromQuery()
 })
 </script>
-
 <template>
-  <div class="mx-auto w-full max-w-[1536px] px-4 sm:px-6 lg:px-8 xl:px-10 py-6 sm:py-8">
-    
-    <!-- Top Toolbar: Live Result Count, Search Bar, Sort Dropdown & Action Controls -->
-    <div 
-      class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-3.5 rounded-xl border border-border bg-bg p-3 sm:px-4 sm:py-3 shadow-xs transition-colors"
-      :style="{ borderColor: 'var(--color-border)' }"
-    >
-      <!-- Results Count -->
-      <div class="flex items-center gap-2">
-        <span class="font-mono text-xs font-semibold text-muted">
-          {{ resultCountText }}
-        </span>
+  <div class="container-editorial py-8 sm:py-10">
+    <div class="flex flex-col gap-5 border-b border-black/10 pb-5 lg:flex-row lg:items-end lg:justify-between">
+      <div>
+        <p class="eyebrow">{{ categorySlug ? (locale === 'ar' ? 'مجموعة' : 'Collection') : (locale === 'ar' ? 'الكتالوج' : 'Catalog') }}</p>
+        <p class="mt-1 text-xs text-black/60">{{ resultCountText }}</p>
       </div>
 
-      <!-- Action Toolbar (Search, Sort, Apply, Mobile Filter Trigger, Reset) -->
       <div class="flex flex-wrap items-center gap-2.5">
-        <!-- Search Input with Embedded Icon -->
-        <div class="relative w-full sm:w-60 md:w-64">
-          <Search class="pointer-events-none absolute start-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted" aria-hidden="true" />
+        <div class="relative w-full sm:w-64">
+          <Search class="pointer-events-none absolute start-0 top-1/2 h-4 w-4 -translate-y-1/2 text-black/55" aria-hidden="true" />
           <input
             v-model="search"
             type="search"
             :placeholder="t('products.search')"
-            class="h-9 w-full rounded-lg border-border bg-surface ps-8 pe-3 text-xs text-text placeholder:text-muted focus:border-primary focus:bg-surface focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
-            :style="{ borderColor: 'var(--color-border)' }"
+            :aria-label="t('products.search')"
+            class="h-10 w-full border-b border-black/20 bg-transparent ps-6 pe-2 text-sm text-black placeholder:text-black/35 focus:border-black focus:outline-none"
             @keyup.enter="apply"
           />
         </div>
 
-        <!-- Sort Select -->
-        <select 
-          v-model="sort" 
-          class="h-9 rounded-lg border-border bg-surface px-2.5 text-xs font-semibold text-muted focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" 
-          :style="{ borderColor: 'var(--color-border)' }" 
+        <select
+          v-model="sort"
+          class="h-10 border-b border-black/20 bg-transparent px-1 text-xs font-semibold uppercase tracking-[0.1em] text-black focus:border-black focus:outline-none"
+          :aria-label="locale === 'ar' ? 'ترتيب المنتجات' : 'Sort products'"
           @change="apply"
         >
           <option value="">{{ t('products.sortDefault') }}</option>
@@ -253,396 +250,224 @@ watch(() => route.query, (newQ) => {
           <option value="newest">{{ t('products.sortNewest') }}</option>
         </select>
 
-        <!-- Cohesive Apply Button -->
-        <button 
-          type="button" 
-          class="inline-flex h-9 items-center justify-center rounded-lg bg-accent px-3.5 text-xs font-bold text-on-accent shadow-xs hover:bg-accent-hover active:scale-95 transition-all" 
-          @click="apply"
-        >
-          <span>{{ t('common.apply') }}</span>
+        <button type="button" class="btn-dark h-10 min-h-10 px-4 text-[11px]" @click="apply">
+          {{ t('common.apply') }}
         </button>
 
-        <!-- Mobile Filter Drawer Trigger (only visible on mobile/tablet < md) -->
-        <button 
-          type="button" 
-          class="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border px-3 text-xs font-bold text-muted hover:bg-border/40 md:hidden" 
-          :style="{ borderColor: 'var(--color-border)' }" 
+        <button
+          type="button"
+          class="inline-flex h-10 items-center gap-1.5 border border-black/20 px-3 text-xs font-semibold text-black md:hidden"
+          :aria-expanded="mobileFilters"
+          aria-controls="mobile-filters"
           @click="mobileFilters = true"
         >
-          <SlidersHorizontal class="h-3.5 w-3.5 text-muted" />
+          <SlidersHorizontal class="h-3.5 w-3.5" aria-hidden="true" />
           <span>{{ t('products.filters') }}</span>
         </button>
 
-        <!-- Reset Button -->
         <button
           v-if="hasActiveFilters"
           type="button"
-          class="inline-flex h-9 items-center gap-1 rounded-lg border border-border px-2.5 text-xs font-medium text-muted hover:text-text transition-colors"
+          class="inline-flex h-10 items-center gap-1 px-2 text-xs font-medium text-black/60 transition-colors hover:text-ultra-600"
           :title="locale === 'ar' ? 'إعادة ضبط الفلاتر' : 'Reset filters'"
           @click="resetFilters"
         >
-          <RotateCcw class="h-3.5 w-3.5" />
+          <RotateCcw class="h-3.5 w-3.5" aria-hidden="true" />
           <span class="hidden sm:inline">{{ locale === 'ar' ? 'إلغاء' : 'Reset' }}</span>
         </button>
       </div>
     </div>
 
-    <!-- Main Content: Sibling Layout [ Products Content Column ] + [ Desktop Sticky Filters Sidebar ] -->
-    <div class="flex flex-col md:flex-row items-start gap-6 lg:gap-8">
-      
-      <!-- DESKTOP STICKY FILTERS SIDEBAR (visible only on md and up; strictly sticky with fit-content & internal scroll) -->
-      <aside 
-        class="hidden md:block md:sticky md:top-20 md:h-fit md:max-h-[calc(100vh-6rem)] md:overflow-y-auto md:pe-1 w-56 lg:w-64 xl:w-68 shrink-0 self-start space-y-4 [scrollbar-width:thin]"
-      >
-        <!-- Category Navigation Block -->
-        <div 
-          class="rounded-xl border border-border bg-bg p-4 shadow-xs"
-          :style="{ borderColor: 'var(--color-border)' }"
-        >
-          <div class="flex items-center justify-between mb-2.5 pb-2 border-b border-border">
-            <h3 class="font-heading text-xs font-bold uppercase tracking-wider text-text">
-              {{ t('products.category') }}
-            </h3>
-            <NuxtLink 
-              v-if="categorySlug" 
-              :to="localePath('/products')" 
-              class="text-[11px] font-bold text-primary hover:underline"
-            >
-              {{ locale === 'ar' ? 'كل المنتجات' : 'All Products' }}
+    <div class="mt-8 flex flex-col items-start gap-8 md:flex-row lg:gap-12">
+      <aside class="hidden w-52 shrink-0 md:sticky md:top-24 md:block md:max-h-[calc(100vh-7rem)] md:overflow-y-auto md:pe-2 lg:w-60">
+        <div class="border-t border-black/10 pt-5">
+          <div class="mb-3 flex items-center justify-between">
+            <h2 class="eyebrow">{{ t('products.category') }}</h2>
+            <NuxtLink v-if="categorySlug" :to="localePath('/products')" class="text-[11px] font-semibold text-black/60 hover:text-ultra-600">
+              {{ locale === 'ar' ? 'الكل' : 'All' }}
             </NuxtLink>
           </div>
-          <ul class="space-y-0.5 text-xs max-h-52 overflow-y-auto pr-1">
+          <ul class="space-y-1">
             <li v-for="c in catData?.categories || []" :key="c.slug">
               <NuxtLink
                 :to="localePath(`/products/${c.slug}`)"
-                class="flex items-center justify-between rounded-lg px-2.5 py-1.5 font-medium transition-colors"
-                :class="(categorySlug === c.slug || route.params.slug === c.slug) 
-                  ? 'bg-primary/10 text-primary font-bold' 
-                  : 'text-muted hover:bg-border/40 hover:text-primary'"
+                class="flex items-center justify-between py-1.5 text-sm transition-colors"
+                :class="(categorySlug === c.slug || route.params.slug === c.slug)
+                  ? 'font-semibold text-ultra-600'
+                  : 'text-black/60 hover:text-black'"
               >
                 <span class="truncate">{{ locale === 'ar' ? c.nameAr : c.nameEn }}</span>
-                <span v-if="c._count?.products" class="font-mono text-[10px] text-muted">
-                  {{ c._count.products }}
-                </span>
+                <span v-if="c._count?.products" class="font-mono text-[10px] text-black/35">{{ c._count.products }}</span>
               </NuxtLink>
             </li>
           </ul>
         </div>
 
-        <!-- Filter Parameters Card -->
-        <div 
-          class="rounded-xl border border-border bg-bg p-4 shadow-xs space-y-4" 
-          :style="{ borderColor: 'var(--color-border)' }"
-        >
-          <!-- Price Range Filter -->
-          <div>
-            <h3 class="font-heading text-xs font-bold uppercase tracking-wider text-text mb-2 pb-1.5 border-b border-border">
-              {{ t('products.priceRange') }} ({{ currencyLabel }})
-            </h3>
-            <div class="flex items-center gap-1.5 pt-1">
-              <input 
-                v-model="minPrice" 
-                type="number" 
-                min="0" 
-                :placeholder="facetsData?.minPrice !== undefined ? String(facetsData.minPrice) : t('products.min')" 
-                class="h-8.5 w-full rounded-lg border-border bg-surface px-2 text-xs text-text focus:border-primary focus:outline-none" 
-                :style="{ borderColor: 'var(--color-border)' }" 
-                @keyup.enter="apply"
-              />
-              <span class="text-xs text-muted font-bold">-</span>
-              <input 
-                v-model="maxPrice" 
-                type="number" 
-                min="0" 
-                :placeholder="facetsData?.maxPrice !== undefined ? String(facetsData.maxPrice) : t('products.max')" 
-                class="h-8.5 w-full rounded-lg border-border bg-surface px-2 text-xs text-text focus:border-primary focus:outline-none" 
-                :style="{ borderColor: 'var(--color-border)' }" 
-                @keyup.enter="apply"
-              />
-            </div>
-            <div v-if="facetsData" class="mt-1 flex justify-between text-[10px] font-mono text-muted">
-              <span>{{ t('products.min') }}: {{ facetsData.minPrice }}</span>
-              <span>{{ t('products.max') }}: {{ facetsData.maxPrice }}</span>
-            </div>
+        <div class="mt-7 border-t border-black/10 pt-5">
+          <h2 class="eyebrow">{{ t('products.priceRange') }}</h2>
+          <div class="mt-3 flex items-center gap-2">
+            <input
+              v-model="minPrice"
+              type="number"
+              min="0"
+              :placeholder="facetsData?.minPrice !== undefined ? String(facetsData.minPrice) : t('products.min')"
+              class="h-9 w-full border-b border-black/20 bg-transparent px-0 text-sm text-black placeholder:text-black/30 focus:border-black focus:outline-none"
+              :aria-label="t('products.min')"
+              @keyup.enter="apply"
+            />
+            <span class="text-black/30">—</span>
+            <input
+              v-model="maxPrice"
+              type="number"
+              min="0"
+              :placeholder="facetsData?.maxPrice !== undefined ? String(facetsData.maxPrice) : t('products.max')"
+              class="h-9 w-full border-b border-black/20 bg-transparent px-0 text-sm text-black placeholder:text-black/30 focus:border-black focus:outline-none"
+              :aria-label="t('products.max')"
+              @keyup.enter="apply"
+            />
           </div>
+          <p v-if="facetsData" class="mt-2 font-mono text-[10px] text-black/35">
+            {{ facetsData.minPrice }} — {{ facetsData.maxPrice }} {{ currencyLabel }}
+          </p>
+        </div>
 
-          <!-- Dynamic Attributes Filters -->
-          <template v-if="facetsData?.attributes?.length">
-            <div 
-              v-for="attr in facetsData.attributes" 
-              :key="attr.keyEn" 
-              class="border-t border-border pt-3"
+        <div v-if="facetsData?.attributes?.length" class="mt-7 border-t border-black/10 pt-5">
+          <div v-for="attr in facetsData.attributes" :key="attr.keyEn" class="mb-5 last:mb-0">
+            <button
+              type="button"
+              class="mb-2 flex w-full items-center justify-between text-start"
+              @click="toggleGroup(attr.keyEn)"
             >
-              <button
-                type="button"
-                class="flex w-full items-center justify-between text-start font-heading text-xs font-bold uppercase tracking-wider text-text mb-2"
-                @click="toggleGroup(attr.keyEn)"
-              >
-                <span>{{ locale === 'ar' ? attr.keyAr : attr.keyEn }}</span>
-                <ChevronUp v-if="isGroupOpen(attr.keyEn)" class="h-3.5 w-3.5 text-muted" />
-                <ChevronDown v-else class="h-3.5 w-3.5 text-muted" />
-              </button>
-
-              <div v-if="isGroupOpen(attr.keyEn)" class="space-y-1.5 max-h-44 overflow-y-auto pr-1">
-                <label 
-                  v-for="val in attr.values" 
-                  :key="val.valueEn"
-                  class="flex items-center justify-between text-xs cursor-pointer rounded px-1.5 py-1 hover:bg-surface transition-colors"
-                  :class="isAttrSelected(attr.keyEn, val.valueEn) ? 'font-bold text-primary' : 'text-muted'"
-                >
-                  <span class="flex items-center gap-2 truncate">
-                    <input 
-                      type="checkbox" 
-                      :checked="isAttrSelected(attr.keyEn, val.valueEn)" 
-                      class="h-3.5 w-3.5 rounded border-border accent-accent" 
-                      @change="toggleAttr(attr.keyEn, val.valueEn)"
-                    />
-                    <span class="truncate">{{ locale === 'ar' ? val.valueAr : val.valueEn }}</span>
-                  </span>
-                  <span class="ms-1.5 shrink-0 font-mono text-[10px] text-muted">
-                    ({{ val.count }})
-                  </span>
-                </label>
-              </div>
-            </div>
-          </template>
-
-          <!-- Apply Filter Button inside Sidebar -->
-          <div class="pt-2 border-t border-border">
-            <button 
-              type="button" 
-              class="h-9 w-full rounded-lg bg-accent text-xs font-bold text-on-accent shadow-xs hover:bg-accent-hover active:scale-95 transition-all" 
-              @click="apply"
-            >
-              {{ t('products.applyFilters') }}
+              <span class="eyebrow !text-black/60">{{ locale === 'ar' ? attr.keyAr : attr.keyEn }}</span>
+              <ChevronUp v-if="isGroupOpen(attr.keyEn)" class="h-3.5 w-3.5 text-black/55" aria-hidden="true" />
+              <ChevronDown v-else class="h-3.5 w-3.5 text-black/55" aria-hidden="true" />
             </button>
+
+            <div v-if="isGroupOpen(attr.keyEn)" class="max-h-44 space-y-1 overflow-y-auto">
+              <label
+                v-for="val in attr.values"
+                :key="val.valueEn"
+                class="flex cursor-pointer items-center justify-between gap-2 py-0.5 text-xs transition-colors"
+                :class="isAttrSelected(attr.keyEn, val.valueEn) ? 'font-semibold text-ultra-600' : 'text-black/60 hover:text-black'"
+              >
+                <span class="flex min-w-0 items-center gap-2">
+                  <input
+                    type="checkbox"
+                    :checked="isAttrSelected(attr.keyEn, val.valueEn)"
+                    class="h-3.5 w-3.5 rounded-none border-black/30 accent-[#D2312D]"
+                    @change="toggleAttr(attr.keyEn, val.valueEn)"
+                  />
+                  <span class="truncate">{{ locale === 'ar' ? val.valueAr : val.valueEn }}</span>
+                </span>
+                <span class="shrink-0 font-mono text-[10px] text-black/35">{{ val.count }}</span>
+              </label>
+            </div>
           </div>
+        </div>
+
+        <div class="mt-7 border-t border-black/10 pt-5">
+          <button type="button" class="btn-dark h-10 min-h-10 w-full text-[11px]" @click="apply">
+            {{ t('products.applyFilters') }}
+          </button>
         </div>
       </aside>
 
-      <!-- PRODUCTS CONTENT COLUMN: Product Grid + Pagination together inside this column -->
-      <div class="min-w-0 flex-1 w-full flex flex-col justify-between min-h-[480px]">
-        
-        <div>
-          <!-- Loading State Skeleton -->
-          <div v-if="pending" class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 w-full" aria-label="Loading catalog">
-            <div v-for="i in 8" :key="i" class="overflow-hidden rounded-xl border border-border bg-bg p-3">
-              <div class="aspect-square w-full animate-pulse rounded-lg bg-border mb-3" />
-              <div class="h-4 w-2/3 animate-pulse rounded bg-border mb-2" />
-              <div class="h-5 w-1/3 animate-pulse rounded bg-border mb-3" />
-              <div class="h-8.5 w-full animate-pulse rounded-lg bg-border/40" />
-            </div>
-          </div>
-
-          <!-- Populated Grid: 4 cards per row on large desktop (xl:grid-cols-4), 3 on lg, 2 on md/mobile -->
-          <div v-else-if="data?.products?.length" class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 w-full">
-            <AppProductCard
-              v-for="p in data.products"
-              :key="p.slug"
-              :product="p"
-            />
-          </div>
-
-          <!-- Empty State with Clear Filters CTA -->
-          <div 
-            v-else 
-            class="rounded-2xl border border-border bg-bg px-6 py-16 text-center shadow-xs" 
-            :style="{ borderColor: 'var(--color-border)' }"
-          >
-            <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
-              <Search class="h-6 w-6" />
-            </div>
-            <h3 class="font-heading text-xl font-bold text-text mb-1.5">
-              {{ t('products.noResults') }}
-            </h3>
-            <p class="text-sm text-muted max-w-sm mx-auto mb-6">
-              {{ t('products.noResultsHint') }}
-            </p>
-            <button 
-              type="button"
-              class="inline-flex h-10 items-center justify-center rounded-full bg-accent px-6 text-xs font-bold text-on-accent shadow-xs hover:bg-accent-hover active:scale-95 transition-all"
-              @click="resetFilters"
-            >
-              {{ locale === 'ar' ? 'إلغاء جميع الفلاتر وعرض المنتجات' : 'Clear Filters & Browse All' }}
-            </button>
+      <div class="min-w-0 flex-1">
+        <div v-if="pending" class="grid grid-cols-2 gap-x-4 gap-y-10 lg:grid-cols-3 xl:grid-cols-4" aria-label="Loading catalog">
+          <div v-for="i in 8" :key="i">
+            <div class="aspect-[4/5] animate-pulse bg-black/[0.04]" />
+            <div class="mt-3 h-3 w-1/2 animate-pulse bg-black/[0.06]" />
+            <div class="mt-2 h-4 w-3/4 animate-pulse bg-black/[0.06]" />
+            <div class="mt-2 h-4 w-1/3 animate-pulse bg-black/[0.06]" />
           </div>
         </div>
 
-        <!-- Pagination Navigation: strictly within products content column, anchored at bottom -->
-        <div class="mt-auto pt-6">
-          <AppPagination 
-            v-if="data && data.pages > 1" 
-            :page="page" 
-            :pages="data.pages" 
-            @change="gotoPage" 
-          />
+        <div v-else-if="data?.products?.length" class="grid grid-cols-2 gap-x-4 gap-y-10 lg:grid-cols-3 xl:grid-cols-4">
+          <AppProductCard v-for="p in data.products" :key="p.slug" :product="p" />
         </div>
 
+        <div v-else class="border border-black/10 px-6 py-20 text-center">
+          <Search class="mx-auto h-7 w-7 text-black/20" aria-hidden="true" />
+          <h3 class="mt-4 font-heading text-xl font-semibold text-black">{{ t('products.noResults') }}</h3>
+          <p class="mx-auto mt-2 max-w-sm text-sm leading-6 text-black/60">{{ t('products.noResultsHint') }}</p>
+          <button type="button" class="btn-outline mt-6" @click="resetFilters">
+            {{ locale === 'ar' ? 'عرض كل المنتجات' : 'Browse all products' }}
+          </button>
+        </div>
+
+        <AppPagination v-if="data && data.pages > 1" :page="page" :pages="data.pages" @change="gotoPage" />
       </div>
-
     </div>
 
-    <!-- RESPONSIVE MOBILE/TABLET DRAWER SHEET (< md) -->
     <Teleport to="body">
-      <div 
-        v-if="mobileFilters" 
-        class="fixed inset-0 z-50 flex md:hidden"
-        role="dialog"
-        aria-modal="true"
-      >
-        <!-- Backdrop Overlay -->
-        <div 
-          class="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity" 
-          aria-hidden="true" 
-          @click="mobileFilters = false" 
-        />
-
-        <!-- Slide-over Drawer Panel -->
-        <div 
-          class="relative ms-auto flex h-full w-full max-w-xs flex-col bg-bg shadow-2xl z-10"
-        >
-          <!-- Drawer Header -->
-          <div class="flex h-14 items-center justify-between border-b px-4" :style="{ borderColor: 'var(--color-border)' }">
-            <div class="flex items-center gap-2">
-              <SlidersHorizontal class="h-4 w-4 text-primary" />
-              <h2 class="font-heading text-sm font-bold text-text">
-                {{ t('products.filters') }}
-              </h2>
-            </div>
-            <button
-              type="button"
-              class="flex h-8 w-8 items-center justify-center rounded-lg text-muted hover:bg-border/40 hover:text-text"
-              :aria-label="locale === 'ar' ? 'إغلاق' : 'Close'"
-              @click="mobileFilters = false"
-            >
-              <X class="h-5 w-5" />
+      <div v-if="mobileFilters" id="mobile-filters" class="fixed inset-0 z-50 flex md:hidden" role="dialog" aria-modal="true" aria-label="Product filters">
+        <div class="fixed inset-0 bg-black/50" aria-hidden="true" @click="mobileFilters = false" />
+        <div class="relative ms-auto flex h-full w-full max-w-sm flex-col bg-white shadow-2xl">
+          <div class="flex h-16 items-center justify-between border-b border-black/10 px-5">
+            <h2 class="font-heading text-sm font-semibold uppercase tracking-[0.12em] text-black">{{ t('products.filters') }}</h2>
+            <button type="button" class="flex h-10 w-10 items-center justify-center text-black" :aria-label="locale === 'ar' ? 'إغلاق' : 'Close'" @click="mobileFilters = false">
+              <X class="h-5 w-5" aria-hidden="true" />
             </button>
           </div>
 
-          <!-- Drawer Scrollable Content -->
-          <div class="flex-1 overflow-y-auto p-4 space-y-4">
-            <!-- Category Navigation -->
-            <div class="rounded-xl border border-border bg-bg p-3.5 shadow-xs">
-              <div class="flex items-center justify-between mb-2 pb-1.5 border-b border-border">
-                <h3 class="font-heading text-xs font-bold uppercase tracking-wider text-text">
-                  {{ t('products.category') }}
-                </h3>
-                <NuxtLink 
-                  v-if="categorySlug" 
-                  :to="localePath('/products')" 
-                  class="text-[11px] font-bold text-primary hover:underline"
-                  @click="mobileFilters = false"
-                >
-                  {{ locale === 'ar' ? 'كل المنتجات' : 'All Products' }}
+          <div class="flex-1 space-y-7 overflow-y-auto px-5 py-6">
+            <div>
+              <div class="mb-3 flex items-center justify-between">
+                <h3 class="eyebrow">{{ t('products.category') }}</h3>
+                <NuxtLink v-if="categorySlug" :to="localePath('/products')" class="text-[11px] font-semibold text-black/60" @click="mobileFilters = false">
+                  {{ locale === 'ar' ? 'الكل' : 'All' }}
                 </NuxtLink>
               </div>
-              <ul class="space-y-0.5 text-xs max-h-48 overflow-y-auto pr-1">
+              <ul class="space-y-1">
                 <li v-for="c in catData?.categories || []" :key="c.slug">
                   <NuxtLink
                     :to="localePath(`/products/${c.slug}`)"
-                    class="flex items-center justify-between rounded-lg px-2 py-1.5 font-medium transition-colors"
-                    :class="(categorySlug === c.slug || route.params.slug === c.slug) 
-                      ? 'bg-primary/10 text-primary font-bold' 
-                      : 'text-muted hover:bg-border/40'"
+                    class="flex items-center justify-between py-1.5 text-sm"
+                    :class="(categorySlug === c.slug || route.params.slug === c.slug) ? 'font-semibold text-ultra-600' : 'text-black/60'"
                     @click="mobileFilters = false"
                   >
-                    <span class="truncate">{{ locale === 'ar' ? c.nameAr : c.nameEn }}</span>
-                    <span v-if="c._count?.products" class="font-mono text-[10px] text-muted">
-                      {{ c._count.products }}
-                    </span>
+                    <span>{{ locale === 'ar' ? c.nameAr : c.nameEn }}</span>
+                    <span v-if="c._count?.products" class="font-mono text-[10px] text-black/35">{{ c._count.products }}</span>
                   </NuxtLink>
                 </li>
               </ul>
             </div>
 
-            <!-- Price & Attributes -->
-            <div class="rounded-xl border border-border bg-bg p-3.5 shadow-xs space-y-4">
-              <!-- Price Filter -->
-              <div>
-                <h3 class="font-heading text-xs font-bold uppercase tracking-wider text-text mb-2 pb-1 border-b border-border">
-                  {{ t('products.priceRange') }} ({{ currencyLabel }})
-                </h3>
-                <div class="flex items-center gap-1.5 pt-1">
-                  <input 
-                    v-model="minPrice" 
-                    type="number" 
-                    min="0" 
-                    :placeholder="facetsData?.minPrice !== undefined ? String(facetsData.minPrice) : t('products.min')" 
-                    class="h-8.5 w-full rounded-lg border-border bg-surface px-2 text-xs text-text" 
-                    :style="{ borderColor: 'var(--color-border)' }" 
-                  />
-                  <span class="text-xs text-muted font-bold">-</span>
-                  <input 
-                    v-model="maxPrice" 
-                    type="number" 
-                    min="0" 
-                    :placeholder="facetsData?.maxPrice !== undefined ? String(facetsData.maxPrice) : t('products.max')" 
-                    class="h-8.5 w-full rounded-lg border-border bg-surface px-2 text-xs text-text" 
-                    :style="{ borderColor: 'var(--color-border)' }" 
-                  />
+            <div class="border-t border-black/10 pt-6">
+              <h3 class="eyebrow">{{ t('products.priceRange') }}</h3>
+              <div class="mt-3 flex items-center gap-2">
+                <input v-model="minPrice" type="number" min="0" :placeholder="facetsData?.minPrice !== undefined ? String(facetsData.minPrice) : t('products.min')" class="h-9 w-full border-b border-black/20 bg-transparent px-0 text-sm focus:border-black focus:outline-none" @keyup.enter="apply" />
+                <span class="text-black/30">—</span>
+                <input v-model="maxPrice" type="number" min="0" :placeholder="facetsData?.maxPrice !== undefined ? String(facetsData.maxPrice) : t('products.max')" class="h-9 w-full border-b border-black/20 bg-transparent px-0 text-sm focus:border-black focus:outline-none" @keyup.enter="apply" />
+              </div>
+            </div>
+
+            <div v-if="facetsData?.attributes?.length" class="border-t border-black/10 pt-6">
+              <div v-for="attr in facetsData.attributes" :key="attr.keyEn" class="mb-5 last:mb-0">
+                <p class="eyebrow mb-2">{{ locale === 'ar' ? attr.keyAr : attr.keyEn }}</p>
+                <div class="max-h-40 space-y-1 overflow-y-auto">
+                  <label
+                    v-for="val in attr.values"
+                    :key="val.valueEn"
+                    class="flex items-center justify-between py-0.5 text-xs"
+                    :class="isAttrSelected(attr.keyEn, val.valueEn) ? 'font-semibold text-ultra-600' : 'text-black/60'"
+                  >
+                    <span class="flex items-center gap-2">
+                      <input type="checkbox" :checked="isAttrSelected(attr.keyEn, val.valueEn)" class="h-3.5 w-3.5 rounded-none accent-[#D2312D]" @change="toggleAttr(attr.keyEn, val.valueEn)" />
+                      <span>{{ locale === 'ar' ? val.valueAr : val.valueEn }}</span>
+                    </span>
+                    <span class="font-mono text-[10px] text-black/35">{{ val.count }}</span>
+                  </label>
                 </div>
               </div>
-
-              <!-- Dynamic Attributes -->
-              <template v-if="facetsData?.attributes?.length">
-                <div 
-                  v-for="attr in facetsData.attributes" 
-                  :key="attr.keyEn" 
-                  class="border-t border-border pt-3"
-                >
-                  <p class="font-heading text-xs font-bold uppercase tracking-wider text-text mb-2">
-                    {{ locale === 'ar' ? attr.keyAr : attr.keyEn }}
-                  </p>
-                  <div class="space-y-1.5 max-h-40 overflow-y-auto pr-1">
-                    <label 
-                      v-for="val in attr.values" 
-                      :key="val.valueEn"
-                      class="flex items-center justify-between text-xs cursor-pointer rounded px-1.5 py-1"
-                      :class="isAttrSelected(attr.keyEn, val.valueEn) ? 'font-bold text-primary' : 'text-muted'"
-                    >
-                      <span class="flex items-center gap-2 truncate">
-                        <input 
-                          type="checkbox" 
-                          :checked="isAttrSelected(attr.keyEn, val.valueEn)" 
-                          class="h-3.5 w-3.5 rounded accent-accent" 
-                          @change="toggleAttr(attr.keyEn, val.valueEn)"
-                        />
-                        <span class="truncate">{{ locale === 'ar' ? val.valueAr : val.valueEn }}</span>
-                      </span>
-                      <span class="ms-1.5 font-mono text-[10px] text-muted">({{ val.count }})</span>
-                    </label>
-                  </div>
-                </div>
-              </template>
             </div>
           </div>
 
-          <!-- Drawer Footer Action -->
-          <div class="p-4 border-t border-border bg-surface">
-            <button 
-              type="button" 
-              class="h-10 w-full rounded-full bg-accent text-xs font-bold text-on-accent shadow-xs hover:bg-accent-hover active:scale-95 transition-all" 
-              @click="apply"
-            >
-              {{ t('products.applyFilters') }}
-            </button>
+          <div class="border-t border-black/10 p-5">
+            <button type="button" class="btn-dark h-11 w-full" @click="apply">{{ t('products.applyFilters') }}</button>
           </div>
         </div>
       </div>
     </Teleport>
-
   </div>
 </template>
-
-<style scoped>
-aside::-webkit-scrollbar {
-  width: 3px;
-}
-aside::-webkit-scrollbar-track {
-  background: transparent;
-}
-aside::-webkit-scrollbar-thumb {
-  background: rgb(var(--border) / 1);
-  border-radius: 4px;
-}
-</style>

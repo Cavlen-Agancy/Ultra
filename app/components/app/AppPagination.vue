@@ -10,9 +10,7 @@ const { locale } = useI18n()
 const visiblePages = computed(() => {
   const total = props.pages
   const current = props.page
-  if (total <= 7) {
-    return Array.from({ length: total }, (_, i) => i + 1)
-  }
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1)
   const window = new Set<number>([1, 2, total - 1, total, current - 1, current, current + 1])
   return [...window].filter(p => p >= 1 && p <= total).sort((a, b) => a - b)
 })
@@ -24,11 +22,10 @@ function goto(p: number) {
 </script>
 
 <template>
-  <nav v-if="pages > 1" class="mt-8 flex flex-wrap items-center justify-center gap-1.5" :aria-label="locale === 'ar' ? 'ترقيم الصفحات' : 'Pagination'">
+  <nav v-if="pages > 1" class="mt-10 flex flex-wrap items-center justify-center gap-1.5" :aria-label="locale === 'ar' ? 'ترقيم الصفحات' : 'Pagination'">
     <button
       type="button"
-      class="inline-flex h-10 min-w-10 items-center justify-center gap-1 rounded-md border border-border px-3 text-sm font-medium text-muted transition-colors hover:bg-border/40 disabled:cursor-not-allowed disabled:opacity-40"
-      :style="{ borderColor: 'var(--color-border)' }"
+      class="inline-flex h-10 min-w-10 items-center justify-center border border-black/15 px-3 text-sm text-black transition-colors hover:border-black disabled:cursor-not-allowed disabled:opacity-30"
       :disabled="page <= 1"
       :aria-label="locale === 'ar' ? 'الصفحة السابقة' : 'Previous page'"
       @click="goto(page - 1)"
@@ -38,14 +35,13 @@ function goto(p: number) {
     </button>
 
     <template v-for="(p, i) in visiblePages" :key="p">
-      <span v-if="i > 0 && p - visiblePages[i - 1] > 1" class="px-1 text-sm text-muted">…</span>
+      <span v-if="i > 0 && p - visiblePages[i - 1] > 1" class="px-1 text-sm text-black/35">…</span>
       <button
         type="button"
-        class="h-10 min-w-10 rounded-md border px-3 text-sm font-semibold transition-colors"
+        class="h-10 min-w-10 border px-3 text-sm font-medium transition-colors"
         :class="p === page
-          ? 'bg-accent text-on-accent'
-          : 'hover:bg-border/40'"
-        :style="p === page ? { borderColor: 'transparent' } : { borderColor: 'var(--color-border)' }"
+          ? 'border-black bg-black text-white'
+          : 'border-black/15 text-black hover:border-black'"
         :aria-current="p === page ? 'page' : undefined"
         @click="goto(p)"
       >
@@ -55,8 +51,7 @@ function goto(p: number) {
 
     <button
       type="button"
-      class="inline-flex h-10 min-w-10 items-center justify-center gap-1 rounded-md border border-border px-3 text-sm font-medium text-muted transition-colors hover:bg-border/40 disabled:cursor-not-allowed disabled:opacity-40"
-      :style="{ borderColor: 'var(--color-border)' }"
+      class="inline-flex h-10 min-w-10 items-center justify-center border border-black/15 px-3 text-sm text-black transition-colors hover:border-black disabled:cursor-not-allowed disabled:opacity-30"
       :disabled="page >= pages"
       :aria-label="locale === 'ar' ? 'الصفحة التالية' : 'Next page'"
       @click="goto(page + 1)"

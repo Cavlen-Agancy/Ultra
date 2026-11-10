@@ -12,18 +12,18 @@ export default <Partial<Config>>{
   theme: {
     extend: {
       colors: {
-        // Neutral placeholder palette. Replace with the Ultra brand palette.
-        gold: {
-          50: '#FAFAFA',
-          100: '#F5F5F5',
-          200: '#E5E5E5',
-          300: '#D4D4D4',
-          400: '#A3A3A3',
-          500: '#737373',
-          600: '#525252',
-          700: '#404040',
-          800: '#262626',
-          900: '#171717',
+        // Ultra brand palette — restrained red accent on black/white.
+        ultra: {
+          50: '#FFF1F0',
+          100: '#FFE0DE',
+          200: '#FFC7C5',
+          300: '#FFA09C',
+          400: '#F66A65',
+          500: '#D2312D',
+          600: '#B72724',
+          700: '#981F1D',
+          800: '#7D1C1B',
+          900: '#681B1A',
         },
         ink: {
           50: '#FAFAFA',
@@ -58,7 +58,7 @@ export default <Partial<Config>>{
         accent: 'rgb(var(--accent) / <alpha-value>)',
         'accent-hover': 'rgb(var(--accent-hover) / <alpha-value>)',
         'on-accent': 'rgb(var(--on-accent) / <alpha-value>)',
-        // Deeper gold for text/links on light surfaces (gold-500 fails contrast there)
+        // Deeper red for text/links on white surfaces
         'accent-text': 'rgb(var(--accent-text) / <alpha-value>)',
 
         // Status tokens (fixed in both modes)
@@ -67,12 +67,12 @@ export default <Partial<Config>>{
         warning: '#F59E0B',
       },
       backgroundImage: {
-        // Neutral placeholder CTA gradient until the Ultra palette is chosen.
-        'gold-gradient': 'linear-gradient(135deg, #A3A3A3 0%, #737373 48%, #525252 100%)',
+        // Ultra primary CTA gradient.
+        'ultra-gradient': 'linear-gradient(135deg, #D2312D 0%, #B72724 100%)',
       },
       boxShadow: {
-        // Neutral placeholder CTA shadow.
-        gold: '0 8px 24px -10px rgb(115 115 115 / 0.22)',
+        // Restrained Ultra CTA shadow.
+        ultra: '0 10px 30px -16px rgb(210 49 45 / 0.28)',
       },
       fontFamily: {
         // Language-aware stacks — resolved from CSS vars so the typeface

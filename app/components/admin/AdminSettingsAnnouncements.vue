@@ -45,13 +45,13 @@ const { data, refresh } = await useAsyncData('admin-announcements-feed', () =>
 )
 
 const isBarActive = ref(true)
-const barBgColor = ref('#737373')
+const barBgColor = ref('#000000')
 const savingSettings = ref(false)
 
 watch(() => data.value, (val) => {
   if (val) {
     isBarActive.value = val.active
-    barBgColor.value = val.bgColor || '#737373'
+    barBgColor.value = val.bgColor || '#000000'
   }
 }, { immediate: true })
 
@@ -241,7 +241,7 @@ const inputCls = 'h-10 w-full rounded-md border bg-surface px-3 text-xs transiti
             <label class="relative h-9 w-9 shrink-0 cursor-pointer overflow-hidden rounded-md border border-border shadow-xs" :style="{ backgroundColor: barBgColor }">
               <input v-model="barBgColor" type="color" class="absolute inset-0 h-full w-full cursor-pointer opacity-0" />
             </label>
-            <input v-model="barBgColor" type="text" placeholder="#737373" dir="ltr" :class="inputCls" />
+            <input v-model="barBgColor" type="text" placeholder="#000000" dir="ltr" :class="inputCls" />
           </div>
         </div>
       </div>

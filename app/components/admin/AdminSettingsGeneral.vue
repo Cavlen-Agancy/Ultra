@@ -15,8 +15,8 @@ const {
     siteNameEn: '',
     taglineAr: '',
     taglineEn: '',
-    primaryDarkColor: '#111111',
-    primaryColor: '#111111',
+    primaryDarkColor: '#000000',
+    primaryColor: '#000000',
     accentColor: 'rgb(var(--accent) / 1)',
   },
   saveEndpoint: '/api/admin/settings/general',
@@ -246,7 +246,7 @@ async function deleteLogo() {
             <label class="relative h-10 w-10 shrink-0 cursor-pointer overflow-hidden rounded-full border border-border shadow-xs" :style="{ backgroundColor: form.primaryDarkColor }" title="Pick color">
               <input v-model="form.primaryDarkColor" type="color" class="absolute inset-0 h-full w-full cursor-pointer opacity-0" />
             </label>
-            <input v-model="form.primaryDarkColor" type="text" placeholder="#111111" dir="ltr" :class="settingsInputCls" pattern="#[0-9a-fA-F]{6}" maxlength="7" />
+            <input v-model="form.primaryDarkColor" type="text" placeholder="#000000" dir="ltr" :class="settingsInputCls" pattern="#[0-9a-fA-F]{6}" maxlength="7" />
           </div>
         </div>
 
@@ -258,7 +258,7 @@ async function deleteLogo() {
             <label class="relative h-10 w-10 shrink-0 cursor-pointer overflow-hidden rounded-full border border-border shadow-xs" :style="{ backgroundColor: form.primaryColor }" title="Pick color">
               <input v-model="form.primaryColor" type="color" class="absolute inset-0 h-full w-full cursor-pointer opacity-0" />
             </label>
-            <input v-model="form.primaryColor" type="text" placeholder="#111111" dir="ltr" :class="settingsInputCls" pattern="#[0-9a-fA-F]{6}" maxlength="7" />
+            <input v-model="form.primaryColor" type="text" placeholder="#000000" dir="ltr" :class="settingsInputCls" pattern="#[0-9a-fA-F]{6}" maxlength="7" />
           </div>
         </div>
 
@@ -270,7 +270,7 @@ async function deleteLogo() {
             <label class="relative h-10 w-10 shrink-0 cursor-pointer overflow-hidden rounded-full border border-border shadow-xs" :style="{ backgroundColor: form.accentColor }" title="Pick color">
               <input v-model="form.accentColor" type="color" class="absolute inset-0 h-full w-full cursor-pointer opacity-0" />
             </label>
-            <input v-model="form.accentColor" type="text" placeholder="#737373" dir="ltr" :class="settingsInputCls" pattern="#[0-9a-fA-F]{6}" maxlength="7" />
+            <input v-model="form.accentColor" type="text" placeholder="#D2312D" dir="ltr" :class="settingsInputCls" pattern="#[0-9a-fA-F]{6}" maxlength="7" />
           </div>
         </div>
       </div>

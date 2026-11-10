@@ -5,7 +5,7 @@
  * The base tokens in assets/css/main.css stay mode-aware; this plugin only
  * overrides when the admin saved custom values. On- colors are picked by
  * luminance so custom colors keep readable contrast in both modes.
- * Defaults are neutral Ultra placeholders until a real palette is configured.
+ * Defaults follow the Ultra palette: black primary with a restrained red accent.
  */
 function hexToChannels(hex: string): string {
   const h = hex.replace('#', '')
@@ -20,11 +20,11 @@ function onChannels(hex: string): string {
   const g = parseInt(h.slice(2, 4), 16) / 255
   const b = parseInt(h.slice(4, 6), 16) / 255
   const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b
-  return lum > 0.45 ? '17 17 17' : '245 245 245'
+  return lum > 0.45 ? '0 0 0' : '255 255 255'
 }
 
-const DEFAULT_PRIMARY = '#111111'
-const DEFAULT_ACCENT = '#737373'
+const DEFAULT_PRIMARY = '#000000'
+const DEFAULT_ACCENT = '#D2312D'
 
 export default defineNuxtPlugin(async () => {
   const brandColors = { primaryDark: DEFAULT_PRIMARY, primary: DEFAULT_PRIMARY, accent: DEFAULT_ACCENT }

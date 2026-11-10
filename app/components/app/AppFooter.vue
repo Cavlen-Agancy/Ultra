@@ -1,139 +1,100 @@
 <script setup lang="ts">
-import { Globe, Mail, MapPin, Phone, ShieldCheck, Zap } from 'lucide-vue-next'
+import { Mail, MapPin, Phone } from 'lucide-vue-next'
 
 const { t, locale } = useI18n()
 const localePath = useLocalePath()
 
 const { data: general } = await useAsyncData('footer-general', () =>
   $fetch<any>('/api/settings/general'),
-  { server: true, lazy: true }
+  { server: true, lazy: true },
 )
 
 const { data: contact } = await useAsyncData('footer-contact', () =>
   $fetch<any>('/api/settings/contact'),
-  { server: true, lazy: true }
+  { server: true, lazy: true },
+)
+
+const { data: categories } = await useAsyncData('footer-categories', () =>
+  $fetch<{ categories: { slug: string, nameAr: string, nameEn: string }[] }>('/api/categories'),
+  { server: true, lazy: true },
 )
 
 const year = new Date().getFullYear()
-
-const siteDisplayName = computed(() => {
-  return general.value?.siteNameEn || general.value?.siteNameAr || t('brand.name')
-})
-
+const hasContact = computed(() => Boolean(contact.value?.contactPhone1 || contact.value?.contactEmail || contact.value?.contactAddressEn || contact.value?.contactAddressAr))
+const siteDisplayName = computed(() => general.value?.siteNameEn || general.value?.siteNameAr || t('brand.name'))
 </script>
 
 <template>
-  <footer class="relative overflow-hidden border-t-2 border-t-[#737373] bg-[#111111] text-muted pt-16 pb-12 transition-colors">
-    <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      
-      <!-- Upper Footer Grid -->
-      <div class="grid grid-cols-1 gap-10 md:grid-cols-12 lg:gap-14 pb-12">
-        
-        <!-- Col 1: Brand & Identity (5 cols) -->
-        <div class="md:col-span-5 space-y-4">
-          <NuxtLink :to="localePath('/')" class="inline-flex min-w-[120px] items-center gap-2.5 p-1 text-white group">
-            <img 
-              v-if="general?.logoPath" 
-              :src="general.logoPath" 
-              :alt="siteDisplayName" 
-              class="h-10 w-auto object-contain" 
+  <footer class="bg-black text-white">
+    <div class="container-editorial py-14 sm:py-16">
+      <div class="grid gap-10 border-b border-white/15 pb-12 md:grid-cols-12 md:gap-8">
+        <div :class="hasContact ? 'md:col-span-5' : 'md:col-span-7'">
+          <NuxtLink :to="localePath('/')" class="inline-flex items-center gap-3">
+            <img
+              v-if="general?.logoPath"
+              :src="general.logoPath"
+              :alt="siteDisplayName"
+              class="h-9 w-auto object-contain brightness-0 invert"
             />
-            <div v-else class="flex items-center gap-2.5">
-              <span class="font-heading text-xl font-bold tracking-tight text-white group-hover:text-accent transition-colors">
-                {{ siteDisplayName }}
-              </span>
-            </div>
+            <span v-else class="font-display text-2xl font-bold uppercase tracking-[0.22em] text-white">
+              {{ siteDisplayName }}
+            </span>
           </NuxtLink>
 
-          <p class="text-[22px] font-bold leading-snug text-[#F5F5F5] max-w-sm">
-            {{ t('brand.shortDesc') }}
-          </p>
-
-          <p class="font-display text-sm tracking-[0.18em] text-[#F5F5F5]/80 max-w-sm" dir="ltr" v-if="locale !== 'ar'">
-            {{ t('brand.tagline') }}
-          </p>
-          <p v-else class="text-sm leading-relaxed text-muted max-w-sm">
+          <p class="mt-5 max-w-sm text-sm leading-7 text-white/60">
             {{ t('brand.longDesc') }}
           </p>
 
-          <!-- Social Links (only configured platforms render; empty = hidden) -->
-          <div class="pt-2">
+          <div class="mt-6">
             <AppSocialLinks variant="footer" />
           </div>
         </div>
 
-        <!-- Col 2: Navigation Links (3 cols) -->
-        <div class="md:col-span-3 space-y-4">
-          <h3 class="font-heading text-xs font-bold uppercase tracking-wider text-white flex items-center gap-2">
-            <span class="h-1.5 w-1.5 rounded-full bg-[#737373]" aria-hidden="true"></span>
-            <span>{{ locale === 'ar' ? 'روابط المنصة' : 'Platform Navigation' }}</span>
-          </h3>
-          <ul class="space-y-2.5 text-sm">
-            <li>
-              <NuxtLink :to="localePath('/')" class="text-muted hover:text-[#737373] hover:translate-x-1 rtl:hover:-translate-x-1 transition-all duration-200 inline-flex items-center gap-1.5">
-                <span>{{ t('nav.home') }}</span>
+        <div class="md:col-span-2">
+          <h2 class="eyebrow !text-white/60">{{ locale === 'ar' ? 'تسوق' : 'Shop' }}</h2>
+          <ul class="mt-4 space-y-3 text-sm text-white/65">
+            <li><NuxtLink :to="localePath('/products')" class="transition-colors hover:text-white">{{ t('nav.allProducts') }}</NuxtLink></li>
+            <li v-for="c in (categories?.categories || []).slice(0, 4)" :key="c.slug">
+              <NuxtLink :to="localePath(`/products/${c.slug}`)" class="transition-colors hover:text-white">
+                {{ locale === 'ar' ? c.nameAr : c.nameEn }}
               </NuxtLink>
             </li>
-            <li>
-              <NuxtLink :to="localePath('/products')" class="text-muted hover:text-[#737373] hover:translate-x-1 rtl:hover:-translate-x-1 transition-all duration-200 inline-flex items-center gap-1.5">
-                <span>{{ t('nav.products') }}</span>
-              </NuxtLink>
-            </li>
-            <li>
-              <NuxtLink :to="localePath('/cart')" class="text-muted hover:text-[#737373] hover:translate-x-1 rtl:hover:-translate-x-1 transition-all duration-200 inline-flex items-center gap-1.5">
-                <span>{{ t('nav.cart') }}</span>
-              </NuxtLink>
-            </li>
+            <li><NuxtLink :to="localePath('/cart')" class="transition-colors hover:text-white">{{ t('nav.cart') }}</NuxtLink></li>
           </ul>
         </div>
 
-        <!-- Col 3: Direct Technical Contact (4 cols) -->
-        <div class="md:col-span-4 space-y-4">
-          <h3 class="font-heading text-xs font-bold uppercase tracking-wider text-white flex items-center gap-2">
-            <span class="h-1.5 w-1.5 rounded-full bg-[#737373]" aria-hidden="true"></span>
-            <span>{{ locale === 'ar' ? 'خدمة العملاء والاستفسارات' : 'Customer Care & Inquiries' }}</span>
-          </h3>
-          <ul class="space-y-3.5 text-sm">
-            <li v-if="contact?.contactPhone1" class="flex items-start gap-3 group">
-              <div class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-white/5 border border-white/10 text-accent shadow-xs group-hover:bg-white/10 group-hover:border-white/20 transition-colors">
-                <Phone class="w-4 h-4" />
-              </div>
-              <div>
-                <span class="block text-[11px] text-muted font-medium">{{ locale === 'ar' ? 'الهاتف المباشر' : 'Direct Line' }}</span>
-                <a :href="`tel:${contact.contactPhone1}`" dir="ltr" class="font-mono text-sm text-[#F5F5F5] hover:text-[#737373] transition-colors">{{ contact.contactPhone1 }}</a>
-              </div>
-            </li>
-
-            <li v-if="contact?.contactEmail" class="flex items-start gap-3 group">
-              <div class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-white/5 border border-white/10 text-accent shadow-xs group-hover:bg-white/10 group-hover:border-white/20 transition-colors">
-                <Mail class="w-4 h-4" />
-              </div>
-              <div>
-                <span class="block text-[11px] text-muted font-medium">{{ locale === 'ar' ? 'البريد الإلكتروني' : 'Official Email' }}</span>
-                <a :href="`mailto:${contact.contactEmail}`" class="text-sm text-[#F5F5F5] hover:text-[#737373] transition-colors">{{ contact.contactEmail }}</a>
-              </div>
-            </li>
-
-            <li v-if="contact?.contactAddressEn || contact?.contactAddressAr" class="flex items-start gap-3 group">
-              <div class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-white/5 border border-white/10 text-accent shadow-xs group-hover:bg-white/10 group-hover:border-white/20 transition-colors">
-                <MapPin class="w-4 h-4" />
-              </div>
-              <div>
-                <span class="block text-[11px] text-muted font-medium">{{ locale === 'ar' ? 'الموقع الفعلي' : 'Location' }}</span>
-                <span class="text-xs text-muted leading-relaxed">{{ locale === 'ar' ? contact.contactAddressAr : contact.contactAddressEn }}</span>
-              </div>
-            </li>
+        <div :class="hasContact ? 'md:col-span-2' : 'md:col-span-3'">
+          <h2 class="eyebrow !text-white/60">{{ locale === 'ar' ? 'المتجر' : 'Store' }}</h2>
+          <ul class="mt-4 space-y-3 text-sm text-white/65">
+            <li><NuxtLink :to="localePath('/')" class="transition-colors hover:text-white">{{ t('nav.home') }}</NuxtLink></li>
+            <li><NuxtLink :to="localePath('/products')" class="transition-colors hover:text-white">{{ t('nav.products') }}</NuxtLink></li>
+            <li><NuxtLink :to="localePath('/admin/login')" class="transition-colors hover:text-white">{{ t('nav.login') }}</NuxtLink></li>
           </ul>
         </div>
 
+        <div v-if="hasContact" class="md:col-span-3">
+          <h2 class="eyebrow !text-white/60">{{ locale === 'ar' ? 'تواصل' : 'Contact' }}</h2>
+          <ul class="mt-4 space-y-3 text-sm text-white/65">
+            <li v-if="contact?.contactPhone1" class="flex items-start gap-2.5">
+              <Phone class="mt-0.5 h-4 w-4 shrink-0 text-ultra-400" aria-hidden="true" />
+              <a :href="`tel:${contact.contactPhone1}`" class="transition-colors hover:text-white" dir="ltr">{{ contact.contactPhone1 }}</a>
+            </li>
+            <li v-if="contact?.contactEmail" class="flex items-start gap-2.5">
+              <Mail class="mt-0.5 h-4 w-4 shrink-0 text-ultra-400" aria-hidden="true" />
+              <a :href="`mailto:${contact.contactEmail}`" class="break-all transition-colors hover:text-white">{{ contact.contactEmail }}</a>
+            </li>
+            <li v-if="contact?.contactAddressEn || contact?.contactAddressAr" class="flex items-start gap-2.5">
+              <MapPin class="mt-0.5 h-4 w-4 shrink-0 text-ultra-400" aria-hidden="true" />
+              <span class="leading-6">{{ locale === 'ar' ? contact.contactAddressAr : contact.contactAddressEn }}</span>
+            </li>
+          </ul>
+        </div>
       </div>
 
-      <!-- Lower Footer: Centered Vertically Stacked Content -->
-      <div class="pt-8 border-t border-white/10 flex flex-col items-center justify-center gap-2 text-center text-xs text-muted">
-        <!-- Line 1: Copyright -->
+      <div class="flex flex-col gap-3 pt-6 text-[11px] uppercase tracking-[0.12em] text-white/55 sm:flex-row sm:items-center sm:justify-between">
         <p>&copy; {{ year }} {{ siteDisplayName }}. {{ locale === 'ar' ? 'جميع الحقوق محفوظة.' : 'All rights reserved.' }}</p>
+        <p>{{ locale === 'ar' ? 'متجر إلكتروني' : 'Online store' }}</p>
       </div>
-
     </div>
   </footer>
 </template>

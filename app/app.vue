@@ -34,8 +34,8 @@ useHead(() => ({
     ...(i18nHead.value.link || []),
   ],
   meta: [
-    { name: 'theme-color', media: '(prefers-color-scheme: dark)', content: '#111111' },
-    { name: 'theme-color', media: '(prefers-color-scheme: light)', content: '#F5F5F5' },
+    { name: 'theme-color', media: '(prefers-color-scheme: dark)', content: '#000000' },
+    { name: 'theme-color', media: '(prefers-color-scheme: light)', content: '#FFFFFF' },
     { property: 'og:site_name', content: siteName.value },
     ...(i18nHead.value.meta || []),
   ],

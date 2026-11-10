@@ -2,7 +2,7 @@
   "brand": {
     "name": "Ultra",
     "shortDesc": "متجر إلكتروني",
-    "longDesc": "Ultra متجر إلكتروني. أضف وصف المتجر والمنتجات من إعدادات الإدارة."
+    "longDesc": "Ultra متجر إلكتروني للمنتجات المختارة. تصفح المجموعة لاكتشاف المتاح."
   },
   "nav": {
     "home": "الرئيسية",
@@ -18,11 +18,11 @@
     "subtitle": "متجر إلكتروني",
     "heroTitleLine1": "Ultra",
     "heroTitleLine2": "متجر إلكتروني",
-    "heroSubtitle": "متجر إلكتروني",
+    "heroSubtitle": "اكتشف المجموعة.",
     "categoryAction": "تصفح الفئة",
     "allCategories": "عرض جميع المنتجات",
     "productsTitle": "وصل حديثاً",
-    "productsSubtitle": "أحدث القطع المضافة للمتجر.",
+    "productsSubtitle": "أحدث المنتجات المضافة للمتجر.",
     "addToCart": "إضافة للسلة",
     "addedToCart": "تمت الإضافة",
     "viewProduct": "تفاصيل المنتج",

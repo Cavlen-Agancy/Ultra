@@ -16,7 +16,7 @@ export default defineEventHandler(async (event) => {
       siteNameAr: 'Ultra',
       siteNameEn: 'Ultra',
       announcementActive: body.announcementActive !== undefined ? Boolean(body.announcementActive) : true,
-      announcementBgColor: body.announcementBgColor || '#737373',
+      announcementBgColor: body.announcementBgColor || '#000000',
     },
   })
 

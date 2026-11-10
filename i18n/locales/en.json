@@ -3,7 +3,7 @@
     "name": "Ultra",
     "tagline": "ONLINE STORE",
     "shortDesc": "Online store",
-    "longDesc": "Ultra is an online store. Add your store description and product content from the admin settings."
+    "longDesc": "Ultra is an online store for curated products. Browse the collection to discover what is available."
   },
   "nav": {
     "home": "Home",
@@ -19,11 +19,11 @@
     "subtitle": "Online store",
     "heroTitleLine1": "Ultra",
     "heroTitleLine2": "ONLINE STORE",
-    "heroSubtitle": "Online store",
+    "heroSubtitle": "Discover the collection.",
     "categoryAction": "Explore Category",
     "allCategories": "View All Products",
     "productsTitle": "New arrivals",
-    "productsSubtitle": "The latest pieces in store.",
+    "productsSubtitle": "The latest products in store.",
     "addToCart": "Add to Cart",
     "addedToCart": "Added",
     "viewProduct": "View Details",

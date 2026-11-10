@@ -66,13 +66,13 @@ watch([text, isRtl], () => nextTick(() => calcRepeatCount()))
   <div
     v-if="visible"
     data-site-ticker
-    class="relative z-30 flex items-stretch gap-2 overflow-hidden border-b bg-[#111111] text-[#F5F5F5]"
+    class="relative z-30 flex items-stretch gap-2 overflow-hidden border-b border-black/10 bg-white text-black"
     :style="{ borderColor: 'var(--color-border)' }"
     role="marquee"
     aria-live="off"
   >
-    <div class="flex shrink-0 items-center gap-1.5 px-3 py-2">
-      <Megaphone class="h-3.5 w-3.5 text-accent" aria-hidden="true" />
+    <div class="flex shrink-0 items-center gap-1.5 border-e border-black/10 px-3 py-2">
+      <Megaphone class="h-3.5 w-3.5 text-ultra-500" aria-hidden="true" />
     </div>
     <div ref="viewportRef" class="relative flex-1 overflow-hidden">
       <!-- Hidden probe (same chunk styling) used to measure one copy's width -->
@@ -95,7 +95,7 @@ watch([text, isRtl], () => nextTick(() => calcRepeatCount()))
     </div>
     <button
       type="button"
-      class="flex shrink-0 items-center px-2.5 text-white/60 hover:text-[#F5F5F5]"
+      class="flex shrink-0 items-center px-2.5 text-black/45 hover:text-black"
       :aria-label="locale === 'ar' ? 'إخفاء الشريط' : 'Dismiss announcement'"
       @click="dismissed = true"
     >

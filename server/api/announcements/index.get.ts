@@ -13,6 +13,6 @@ export default defineEventHandler(async () => {
   return {
     items,
     active: settings?.announcementActive ?? true,
-    bgColor: settings?.announcementBgColor || '#737373',
+    bgColor: settings?.announcementBgColor || '#000000',
   }
 })

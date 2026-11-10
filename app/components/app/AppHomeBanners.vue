@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ArrowRight, Sparkles } from 'lucide-vue-next'
+import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-vue-next'
 
 const props = defineProps<{ placement: string }>()
 
@@ -14,6 +14,13 @@ const slotBanners = computed(() =>
   (data.value?.banners || []).filter(b => b.placement === props.placement),
 )
 
+const currentIndex = ref(0)
+const current = computed(() => slotBanners.value[currentIndex.value] || null)
+
+watch(slotBanners, (items) => {
+  if (currentIndex.value >= items.length) currentIndex.value = 0
+})
+
 function titleOf(b: any) {
   return locale.value === 'ar' ? (b.titleAr || b.titleEn) : (b.titleEn || b.titleAr)
 }
@@ -26,135 +33,120 @@ function btnOf(b: any) {
   return locale.value === 'ar' ? (b.buttonTextAr || b.buttonTextEn) : (b.buttonTextEn || b.buttonTextAr)
 }
 
-function isFullWidth(b: any) {
-  return !b.widthPercent || Number(b.widthPercent) >= 100
+function isExternal(url: string) {
+  return /^https?:\/\//i.test(url)
+}
+
+function next() {
+  if (slotBanners.value.length <= 1) return
+  currentIndex.value = (currentIndex.value + 1) % slotBanners.value.length
+}
+
+function prev() {
+  if (slotBanners.value.length <= 1) return
+  currentIndex.value = (currentIndex.value - 1 + slotBanners.value.length) % slotBanners.value.length
+}
+
+function goTo(index: number) {
+  currentIndex.value = index
 }
 </script>
 
 <template>
-  <template v-if="slotBanners.length">
-    <div
-      v-for="b in slotBanners"
-      :key="b.id"
-      class="w-full"
-    >
-      <!-- MODE 1: Full-Bleed Integrated Section (100% Width) -->
-      <!-- Spans edge-to-edge with border-y and 7xl content grid, matching Category sections -->
-      <section
-        v-if="isFullWidth(b)"
-        class="relative w-full overflow-hidden border-y border-white/10 bg-ink-950 text-white"
-        :style="{ backgroundColor: b.backgroundColor || undefined, color: b.textColor || undefined }"
+  <section
+    v-if="current"
+    class="relative overflow-hidden border-y border-black/10 bg-black text-white"
+    :class="Number(current.widthPercent) < 100 ? 'py-8 sm:py-12' : ''"
+    :aria-label="titleOf(current)"
+  >
+    <div :class="Number(current.widthPercent) < 100 ? 'container-editorial' : ''">
+      <div
+        class="relative overflow-hidden"
+        :class="Number(current.widthPercent) < 100 ? 'mx-auto' : ''"
+        :style="{ maxWidth: Number(current.widthPercent) < 100 ? `${current.widthPercent}%` : 'none' }"
       >
-        <!-- Background Image (if configured) -->
         <img
-          v-if="b.backgroundImagePath"
-          :src="b.backgroundImagePath"
-          :alt="titleOf(b)"
-          class="absolute inset-0 h-full w-full object-cover object-center"
+          v-if="current.backgroundImagePath"
+          :src="current.backgroundImagePath"
+          :alt="titleOf(current)"
+          class="absolute inset-0 h-full w-full object-cover"
           loading="lazy"
         />
+        <div class="absolute inset-0 bg-black/55" aria-hidden="true" />
+        <div class="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/60 to-transparent" aria-hidden="true" />
 
-        <!-- Fallback Ambient Brand Gradient (when no image) -->
-        <div
-          v-else
-          class="absolute inset-0 bg-gradient-to-r from-ink-950 via-ink-800 to-ink-950"
-        ></div>
-
-        <!-- Technical Grid Pattern Overlay (consistent with Hero & Trust bar) -->
-        <div
-          class="pointer-events-none absolute inset-0 opacity-[0.06]"
-          style="background-image: radial-gradient(rgb(var(--accent) / 0.35) 1px, transparent 1px); background-size: 24px 24px;"
-        ></div>
-
-        <!-- High-Contrast Scrim -->
-        <div class="absolute inset-0 bg-gradient-to-t from-ink-950 via-ink-950/75 to-ink-950/85"></div>
-
-        <!-- Section Content: Aligned with standard 7xl grid -->
-        <div class="relative z-10 mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24 text-center">
-          <div class="mb-4 inline-flex items-center gap-1.5 rounded-full border border-[#F5F5F5]/30 bg-[#F5F5F5]/10 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-[#F5F5F5] backdrop-blur-xs">
-            <Sparkles class="h-3.5 w-3.5" />
-            <span>{{ locale === 'ar' ? 'عرض خاص وتوريدات معتمدة' : 'Featured Industrial Offer' }}</span>
-          </div>
-
-          <h2 class="font-heading mx-auto mb-4 max-w-4xl text-2xl font-extrabold leading-tight tracking-tight text-white sm:text-4xl lg:text-5xl">
-            {{ titleOf(b) }}
-          </h2>
-
-          <p v-if="descOf(b)" class="mx-auto mb-8 max-w-2xl text-sm leading-relaxed text-[#F5F5F5] sm:text-base lg:text-lg">
-            {{ descOf(b) }}
-          </p>
-
-          <NuxtLink
-            v-if="btnOf(b) && b.buttonLinkValue"
-            :to="localePath(b.buttonLinkValue)"
-            class="inline-flex h-12 items-center gap-2 rounded-full bg-accent px-8 text-sm font-bold text-on-accent shadow-lg shadow-accent/20 transition-all hover:bg-accent-hover active:scale-[0.98] sm:text-base"
-          >
-            <span>{{ btnOf(b) }}</span>
-            <ArrowRight class="h-4 w-4 rtl:rotate-180" />
-          </NuxtLink>
-        </div>
-      </section>
-
-      <!-- MODE 2: Contained Proportional Width (< 100%, e.g. 50%, 60%, 75%) -->
-      <!-- Centered within the 7xl content flow with intentional rounded card styling -->
-      <section
-        v-else
-        class="w-full px-4 py-8 sm:px-6 sm:py-12 lg:px-8"
-      >
-        <div class="mx-auto max-w-7xl">
-          <div
-            class="relative mx-auto w-full overflow-hidden rounded-2xl border border-white/10 bg-ink-950 text-white shadow-xl transition-all sm:max-w-[var(--banner-width)]"
-            :style="{ '--banner-width': `${b.widthPercent}%`, backgroundColor: b.backgroundColor || undefined, color: b.textColor || undefined }"
-          >
-            <!-- Background Image -->
-            <img
-              v-if="b.backgroundImagePath"
-              :src="b.backgroundImagePath"
-              :alt="titleOf(b)"
-              class="absolute inset-0 h-full w-full object-cover object-center"
-              loading="lazy"
-            />
-            <div
-              v-else
-              class="absolute inset-0 bg-gradient-to-r from-ink-950 via-ink-800 to-ink-950"
-            ></div>
-
-            <!-- Technical Grid Pattern Overlay -->
-            <div
-              class="pointer-events-none absolute inset-0 opacity-[0.06]"
-              style="background-image: radial-gradient(rgb(var(--accent) / 0.35) 1px, transparent 1px); background-size: 24px 24px;"
-            ></div>
-
-            <!-- High-Contrast Scrim -->
-            <div class="absolute inset-0 bg-gradient-to-t from-ink-950 via-ink-950/75 to-ink-950/85"></div>
-
-            <!-- Content -->
-            <div class="relative z-10 px-6 py-10 text-center sm:px-10 sm:py-14">
-              <div class="mb-3 inline-flex items-center gap-1.5 rounded-full border border-[#F5F5F5]/30 bg-[#F5F5F5]/10 px-3 py-0.5 text-[11px] font-bold uppercase tracking-wider text-[#F5F5F5] backdrop-blur-xs">
-                <Sparkles class="h-3 w-3" />
-                <span>{{ locale === 'ar' ? 'عرض خاص' : 'Featured Offer' }}</span>
-              </div>
-
-              <h2 class="font-heading mx-auto mb-3 max-w-3xl text-xl font-extrabold leading-tight tracking-tight text-white sm:text-3xl lg:text-4xl">
-                {{ titleOf(b) }}
+        <Transition
+          mode="out-in"
+          enter-active-class="transition duration-300 ease-out"
+          enter-from-class="opacity-0 translate-y-2"
+          enter-to-class="opacity-100 translate-y-0"
+          leave-active-class="transition duration-150 ease-in"
+          leave-from-class="opacity-100 translate-y-0"
+          leave-to-class="opacity-0 -translate-y-2"
+        >
+          <div :key="current.id" class="relative flex min-h-[340px] items-end px-5 py-10 sm:min-h-[420px] sm:px-10 sm:py-14 lg:px-14">
+            <div class="max-w-2xl">
+              <p class="eyebrow !text-white/55">Ultra</p>
+              <h2 class="mt-3 font-heading text-3xl font-semibold tracking-tight text-white sm:text-4xl lg:text-5xl">
+                {{ titleOf(current) }}
               </h2>
-
-              <p v-if="descOf(b)" class="mx-auto mb-6 max-w-2xl text-xs leading-relaxed text-[#F5F5F5] sm:text-sm lg:text-base">
-                {{ descOf(b) }}
+              <p v-if="descOf(current)" class="mt-4 max-w-xl text-sm leading-7 text-white/75 sm:text-base">
+                {{ descOf(current) }}
               </p>
-
               <NuxtLink
-                v-if="btnOf(b) && b.buttonLinkValue"
-                :to="localePath(b.buttonLinkValue)"
-                class="inline-flex h-11 items-center gap-2 rounded-full bg-accent px-7 text-xs font-bold text-on-accent shadow-md transition-all hover:bg-accent-hover active:scale-[0.98] sm:text-sm"
+                v-if="btnOf(current) && current.buttonLinkValue && !isExternal(current.buttonLinkValue)"
+                :to="localePath(current.buttonLinkValue)"
+                class="btn-primary mt-7"
               >
-                <span>{{ btnOf(b) }}</span>
-                <ArrowRight class="h-4 w-4 rtl:rotate-180" />
+                {{ btnOf(current) }}
+                <ArrowRight class="h-4 w-4 rtl:rotate-180" aria-hidden="true" />
               </NuxtLink>
+              <a
+                v-else-if="btnOf(current) && current.buttonLinkValue"
+                :href="current.buttonLinkValue"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="btn-primary mt-7"
+              >
+                {{ btnOf(current) }}
+                <ArrowRight class="h-4 w-4 rtl:rotate-180" aria-hidden="true" />
+              </a>
             </div>
           </div>
+        </Transition>
+
+        <div v-if="slotBanners.length > 1" class="absolute bottom-4 end-4 flex items-center gap-2 sm:bottom-6 sm:end-8">
+          <button
+            type="button"
+            class="flex h-10 w-10 items-center justify-center border border-white/30 text-white transition-colors hover:border-white hover:bg-white hover:text-black"
+            :aria-label="locale === 'ar' ? 'الشريط السابق' : 'Previous banner'"
+            @click="prev"
+          >
+            <ChevronLeft class="h-4 w-4 rtl:rotate-180" aria-hidden="true" />
+          </button>
+          <button
+            type="button"
+            class="flex h-10 w-10 items-center justify-center border border-white/30 text-white transition-colors hover:border-white hover:bg-white hover:text-black"
+            :aria-label="locale === 'ar' ? 'الشريط التالي' : 'Next banner'"
+            @click="next"
+          >
+            <ChevronRight class="h-4 w-4 rtl:rotate-180" aria-hidden="true" />
+          </button>
         </div>
-      </section>
+
+        <div v-if="slotBanners.length > 1" class="absolute bottom-5 start-5 flex items-center gap-1.5 sm:bottom-8 sm:start-10 lg:start-14">
+          <button
+            v-for="(banner, index) in slotBanners"
+            :key="banner.id"
+            type="button"
+            class="h-1.5 transition-all"
+            :class="index === currentIndex ? 'w-5 bg-ultra-500' : 'w-1.5 bg-white/45 hover:bg-white'"
+            :aria-label="locale === 'ar' ? `عرض الشريط ${index + 1}` : `Show banner ${index + 1}`"
+            :aria-current="index === currentIndex ? 'true' : undefined"
+            @click="goTo(index)"
+          />
+        </div>
+      </div>
     </div>
-  </template>
+  </section>
 </template>

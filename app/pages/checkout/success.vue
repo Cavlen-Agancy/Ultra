@@ -9,10 +9,8 @@ import {
   CreditCard, 
   FileText, 
   Home, 
-  MapPin, 
   PackageCheck, 
   Phone, 
-  PhoneCall, 
   Printer, 
   ShieldCheck, 
   ShoppingBag, 
@@ -163,14 +161,14 @@ onMounted(() => {
 <template>
   <div class="relative min-h-[80vh] overflow-hidden py-8 sm:py-14 print:py-0 print:bg-white selection:bg-accent selection:text-on-accent">
     <!-- Ambient Background Lighting -->
-    <div class="pointer-events-none absolute -top-40 start-1/2 h-96 w-96 -translate-x-1/2 rounded-full bg-emerald-500/10 blur-3xl print:hidden" />
+    <div class="pointer-events-none absolute -top-40 start-1/2 h-96 w-96 -translate-x-1/2 rounded-full bg-ultra-500/10 blur-3xl print:hidden" />
     <div class="pointer-events-none absolute top-72 end-10 h-80 w-80 rounded-full bg-primary/10 blur-3xl print:hidden" />
 
     <div class="relative mx-auto w-full max-w-5xl px-4 sm:px-6 lg:px-8">
       <!-- Access gate: order details require the confirmation link (short-lived token) -->
       <div
         v-if="!accessToken || orderError"
-        class="mx-auto mb-8 max-w-md rounded-2xl border border-border bg-bg p-6 text-center shadow-xs"
+        class="mx-auto mb-8 max-w-md rounded-sm border border-border bg-bg p-6 text-center shadow-xs"
       >
         <h2 class="font-heading text-base font-bold text-text">
           {{ locale === 'ar' ? 'تعذر عرض تفاصيل الطلب' : 'Could not load order details' }}
@@ -183,20 +181,20 @@ onMounted(() => {
       <!-- Online payment verification status -->
       <div
         v-if="order?.paymentMethod === 'ONLINE' && accessToken"
-        class="mx-auto mb-6 max-w-2xl rounded-xl border border-border bg-bg p-4 text-center text-sm font-bold"
+        class="mx-auto mb-6 max-w-2xl rounded-sm border border-border bg-bg p-4 text-center text-sm font-bold"
       >
         <span v-if="isVerifyingPayment">{{ locale === 'ar' ? 'جاري التحقق من الدفع...' : 'Verifying payment...' }}</span>
-        <span v-else-if="paymentVerification?.verified" class="text-success">{{ locale === 'ar' ? 'تم التحقق من الدفع' : 'Payment verified' }}</span>
-        <span v-else-if="paymentVerification?.paymentStatus === 'paid'" class="text-success">{{ locale === 'ar' ? 'تم الدفع' : 'Paid' }}</span>
-        <span v-else-if="paymentVerification?.paymentStatus === 'failed' || paymentVerification?.paymentStatus === 'cancelled'" class="text-error">{{ locale === 'ar' ? 'فشل الدفع أو تم إلغاؤه' : 'Payment failed or cancelled' }}</span>
-        <span v-else class="text-warning">{{ locale === 'ar' ? 'في انتظار تأكيد الدفع' : 'Payment pending' }}</span>
+        <span v-else-if="paymentVerification?.verified" class="text-black">{{ locale === 'ar' ? 'تم التحقق من الدفع' : 'Payment verified' }}</span>
+        <span v-else-if="paymentVerification?.paymentStatus === 'paid'" class="text-black">{{ locale === 'ar' ? 'تم الدفع' : 'Paid' }}</span>
+        <span v-else-if="paymentVerification?.paymentStatus === 'failed' || paymentVerification?.paymentStatus === 'cancelled'" class="text-ultra-600">{{ locale === 'ar' ? 'فشل الدفع أو تم إلغاؤه' : 'Payment failed or cancelled' }}</span>
+        <span v-else class="text-black/60">{{ locale === 'ar' ? 'في انتظار تأكيد الدفع' : 'Payment pending' }}</span>
         <span v-if="paymentVerificationError" class="block text-xs font-normal text-muted">{{ paymentVerificationError }}</span>
       </div>
 
       <!-- Top Celebratory Hero Banner -->
       <div class="text-center pb-8 sm:pb-10">
         <!-- Animated Ring Badge -->
-        <div class="relative mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-xl shadow-emerald-500/25 ring-8 ring-emerald-500/15 transition-transform duration-300 hover:scale-105">
+        <div class="relative mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-ultra-500 to-black text-white shadow-xl shadow-ultra-500/25 ring-8 ring-ultra-500/15 transition-transform duration-300 hover:scale-105">
           <CheckCircle2 class="h-10 w-10 stroke-[2.5]" aria-hidden="true" />
           <span class="absolute -bottom-1 -end-1 flex h-6 w-6 items-center justify-center rounded-full bg-accent text-on-accent shadow-md">
             <PackageCheck class="h-3.5 w-3.5 stroke-[2.5]" />
@@ -204,8 +202,8 @@ onMounted(() => {
         </div>
 
         <!-- Pill Status Indicator -->
-        <div class="mb-3 inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1 text-xs font-bold text-emerald-700">
-          <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+        <div class="mb-3 inline-flex items-center gap-2 rounded-full border border-ultra-500/30 bg-ultra-500/10 px-4 py-1 text-xs font-bold text-ultra-700">
+          <span class="h-2 w-2 rounded-full bg-ultra-500 animate-pulse" />
           <span>{{ locale === 'ar' ? 'تم استلام وتأكيد طلبك بنجاح' : 'Order Placed & Confirmed' }}</span>
         </div>
 
@@ -220,7 +218,7 @@ onMounted(() => {
 
       <!-- Quick Action Bar: Copy Order # + Print Receipt + WhatsApp Chat -->
       <div 
-        class="mb-8 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-bg p-3.5 sm:px-5 sm:py-3.5 shadow-xs print:border-none print:shadow-none"
+        class="mb-8 flex flex-wrap items-center justify-between gap-3 rounded-sm border border-border bg-bg p-3.5 sm:px-5 sm:py-3.5 shadow-xs print:border-none print:shadow-none"
         :style="{ borderColor: 'var(--color-border)' }"
       >
         <div class="flex items-center gap-2.5">
@@ -236,7 +234,7 @@ onMounted(() => {
             :title="locale === 'ar' ? 'نسخ رقم الطلب' : 'Copy Order #'"
             @click="copyOrderNumber"
           >
-            <Check v-if="copied" class="h-3 w-3 text-emerald-500 stroke-[3]" />
+            <Check v-if="copied" class="h-3 w-3 text-ultra-500 stroke-[3]" />
             <Copy v-else class="h-3 w-3 text-muted" />
             <span>{{ copied ? (locale === 'ar' ? 'تم النسخ' : 'Copied') : (locale === 'ar' ? 'نسخ' : 'Copy') }}</span>
           </button>
@@ -247,9 +245,9 @@ onMounted(() => {
             :href="whatsappUrl"
             target="_blank"
             rel="noopener noreferrer"
-            class="inline-flex h-8 items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-50 px-3 text-xs font-bold text-emerald-700 hover:bg-emerald-100 transition-colors"
+            class="inline-flex h-8 items-center gap-1.5 rounded-lg border border-ultra-500/30 bg-ultra-50 px-3 text-xs font-bold text-ultra-700 hover:bg-ultra-100 transition-colors"
           >
-            <IconWhatsApp class="h-3.5 w-3.5 fill-current text-emerald-600" />
+            <IconWhatsApp class="h-3.5 w-3.5 fill-current text-ultra-600" />
             <span class="hidden sm:inline">{{ locale === 'ar' ? 'تأكيد عبر واتساب' : 'WhatsApp' }}</span>
           </a>
 
@@ -270,63 +268,29 @@ onMounted(() => {
         <!-- Left / Primary Column (7 cols): Timeline + Order Items Breakdown -->
         <div class="lg:col-span-7 space-y-6">
           
-          <!-- 3-Step Delivery Progress Tracker Card -->
-          <div 
-            class="rounded-2xl border border-border bg-bg p-5 sm:p-6 shadow-xs transition-colors"
+          <!-- Order status, sourced from the order record only. -->
+          <div
+            class="rounded-sm border border-border bg-bg p-5 sm:p-6 shadow-xs transition-colors"
             :style="{ borderColor: 'var(--color-border)' }"
           >
-            <h2 class="font-heading text-sm font-bold text-text mb-4 flex items-center justify-between">
-              <span>{{ locale === 'ar' ? 'مراحل تنفيذ وتجهيز الطلب' : 'Fulfillment Status' }}</span>
-              <span v-if="formattedDate" class="text-[11px] font-normal text-muted font-mono">{{ formattedDate }}</span>
-            </h2>
-
-            <div class="grid grid-cols-3 gap-2 text-center pt-2">
-              <!-- Step 1 -->
-              <div class="flex flex-col items-center">
-                <div class="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-500 text-white shadow-xs">
-                  <Check class="h-4 w-4 stroke-[3]" />
-                </div>
-                <span class="mt-2 text-xs font-bold text-emerald-600">
-                  {{ locale === 'ar' ? 'تم استلام الطلب' : 'Order Placed' }}
-                </span>
-                <span class="text-[10px] text-muted hidden sm:block mt-0.5">
-                  {{ locale === 'ar' ? 'مسجل ومؤكد' : 'Confirmed' }}
-                </span>
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p class="eyebrow">{{ locale === 'ar' ? 'حالة الطلب' : 'Order status' }}</p>
+                <p class="mt-2 font-heading text-xl font-semibold text-text">{{ order?.status || 'Pending' }}</p>
               </div>
-
-              <!-- Step 2 -->
-              <div class="flex flex-col items-center">
-                <div class="relative flex h-9 w-9 items-center justify-center rounded-full bg-accent text-on-accent shadow-xs">
-                  <PhoneCall class="h-4 w-4 animate-bounce" />
-                  <span class="absolute -top-1 -end-1 flex h-2.5 w-2.5">
-                    <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-75" />
-                    <span class="relative inline-flex h-2.5 w-2.5 rounded-full bg-accent" />
-                  </span>
-                </div>
-                <span class="mt-2 text-xs font-bold text-accent-text dark:text-accent">
-                  {{ locale === 'ar' ? 'التأكيد الهاتفي' : 'Phone Confirmation' }}
-                </span>
-                <span class="text-[10px] text-muted hidden sm:block mt-0.5 font-semibold text-accent-text dark:text-accent">
-                  {{ locale === 'ar' ? 'الخطوة الحالية' : 'Current Step' }}
-                </span>
-              </div>
-
-              <!-- Step 3 -->
-              <div class="flex flex-col items-center opacity-70">
-                <div class="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-border/40 text-muted">
-                  <Truck class="h-4 w-4" />
-                </div>
-                <span class="mt-2 text-xs font-medium text-muted">
-                  {{ locale === 'ar' ? 'التجهيز والشحن' : 'Dispatch & Delivery' }}
-                </span>
-              </div>
+              <p v-if="formattedDate" class="font-mono text-[11px] text-muted">{{ formattedDate }}</p>
             </div>
+            <p class="mt-3 text-xs leading-6 text-muted">
+              {{ locale === 'ar'
+                ? 'يمكنك متابعة حالة الطلب أو التواصل مع المتجر لأي استفسار.'
+                : 'You can review the order status or contact the store with any questions.' }}
+            </p>
           </div>
 
           <!-- Order Items Itemized Receipt Card (if available) -->
           <div 
             v-if="order?.items && order.items.length"
-            class="rounded-2xl border border-border bg-bg p-5 sm:p-6 shadow-xs transition-colors"
+            class="rounded-sm border border-border bg-bg p-5 sm:p-6 shadow-xs transition-colors"
             :style="{ borderColor: 'var(--color-border)' }"
           >
             <div class="flex items-center justify-between border-b border-border pb-3 mb-4">
@@ -387,8 +351,8 @@ onMounted(() => {
               </div>
               <div class="flex justify-between text-muted">
                 <span>{{ locale === 'ar' ? 'مصاريف الشحن والتوصيل' : 'Shipping & Handling' }}</span>
-                <span class="font-semibold text-emerald-600">
-                  {{ locale === 'ar' ? 'شحن قياسي سريع (يحدد هاتفياً)' : 'Calculated upon dispatch' }}
+                <span class="font-semibold text-ultra-600">
+                  {{ locale === 'ar' ? 'تُحدد مع المتجر' : 'Confirmed with the store' }}
                 </span>
               </div>
               <div class="pt-2 border-t border-border flex items-baseline justify-between">
@@ -417,7 +381,7 @@ onMounted(() => {
 
             <NuxtLink 
               :to="localePath('/')" 
-              class="inline-flex h-12 items-center justify-center gap-2 rounded-xl border border-border bg-surface px-6 text-sm font-semibold text-muted hover:bg-border/40 active:scale-[0.98] transition-all"
+              class="inline-flex h-12 items-center justify-center gap-2 rounded-sm border border-border bg-surface px-6 text-sm font-semibold text-muted hover:bg-border/40 active:scale-[0.98] transition-all"
             >
               <Home class="h-4 w-4 text-muted" />
               <span>{{ locale === 'ar' ? 'الرئيسية' : 'Home' }}</span>
@@ -432,7 +396,7 @@ onMounted(() => {
           <!-- CHANGE 3 — تفاصيل طلبك (Customer Details Card) -->
           <div>
             <div
-              class="rounded-xl border border-border bg-bg shadow-xs transition-colors"
+              class="rounded-sm border border-border bg-bg shadow-xs transition-colors"
               style="border-color: rgb(var(--border) / 1); padding: 20px;"
               :dir="locale === 'ar' ? 'rtl' : 'ltr'"
             >
@@ -502,7 +466,7 @@ onMounted(() => {
 
           <!-- CHANGE 4 — رسالة التواصل بعد تأكيد الطلب (Contact Assurance Banner) -->
           <div
-            class="rounded-xl bg-primary/10 text-center shadow-xs border border-primary/30 transition-colors"
+            class="rounded-sm bg-primary/10 text-center shadow-xs border border-primary/30 transition-colors"
             style="padding: 20px;"
             :dir="locale === 'ar' ? 'rtl' : 'ltr'"
           >
@@ -553,7 +517,7 @@ onMounted(() => {
                 :href="whatsappUrl"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="inline-flex items-center gap-2 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-1.5 text-xs font-bold shadow-xs active:scale-95 transition-all"
+                class="inline-flex items-center gap-2 rounded-full bg-ultra-600 hover:bg-ultra-700 text-white px-4 py-1.5 text-xs font-bold shadow-xs active:scale-95 transition-all"
               >
                 <IconWhatsApp class="h-4 w-4 fill-current" />
                 <span>{{ locale === 'ar' ? 'محادثة مباشرة عبر واتساب' : 'Chat via WhatsApp' }}</span>
@@ -574,7 +538,7 @@ onMounted(() => {
 
             <NuxtLink 
               :to="localePath('/')" 
-              class="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl border border-border bg-surface px-6 text-sm font-semibold text-muted hover:bg-border/40 active:scale-[0.98] transition-all"
+              class="inline-flex h-12 w-full items-center justify-center gap-2 rounded-sm border border-border bg-surface px-6 text-sm font-semibold text-muted hover:bg-border/40 active:scale-[0.98] transition-all"
             >
               <Home class="h-4 w-4 text-muted" />
               <span>{{ locale === 'ar' ? 'الصفحة الرئيسية' : 'Home' }}</span>
@@ -588,7 +552,7 @@ onMounted(() => {
       <!-- Trust Badges Strip (Footer of receipt) -->
       <div class="mt-12 grid grid-cols-2 sm:grid-cols-3 gap-3 border-t border-border pt-6 text-center text-xs text-muted print:hidden">
         <div class="flex items-center justify-center gap-1.5">
-          <ShieldCheck class="h-4 w-4 text-emerald-500 shrink-0" />
+          <ShieldCheck class="h-4 w-4 text-ultra-500 shrink-0" />
           <span>{{ locale === 'ar' ? 'قطع أصلية ومضمونة 100%' : '100% Genuine Components' }}</span>
         </div>
         <div class="flex items-center justify-center gap-1.5">
@@ -596,7 +560,7 @@ onMounted(() => {
           <span>{{ locale === 'ar' ? 'تغليف آمن ومحكم للشحن' : 'Safe Industrial Packaging' }}</span>
         </div>
         <div class="col-span-2 sm:col-span-1 flex items-center justify-center gap-1.5">
-          <Clock class="h-4 w-4 text-amber-500 shrink-0" />
+          <Clock class="h-4 w-4 text-ultra-500 shrink-0" />
           <span>{{ locale === 'ar' ? 'فريق دعم فني معتمد' : 'Certified Technical Support' }}</span>
         </div>
       </div>
