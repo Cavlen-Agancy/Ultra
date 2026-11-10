@@ -548,7 +548,7 @@ async function removeExpense(e: Expense) {
               </button>
               <a
                 href="#finance-transactions"
-                class="ms-auto flex h-12 w-12 items-center justify-center rounded-full bg-lime-300 text-text transition-transform hover:scale-105"
+                class="ms-auto flex h-12 w-12 items-center justify-center rounded-full bg-lime-300 text-[#0A0A0A] transition-transform hover:scale-105 dark:bg-lime-900/50 dark:text-lime-50"
                 :aria-label="locale === 'ar' ? 'الانتقال إلى المعاملات' : 'Go to transactions'"
               >
                 <ArrowUpRight class="h-5 w-5" aria-hidden="true" />
@@ -557,14 +557,14 @@ async function removeExpense(e: Expense) {
           </div>
 
           <!-- Net profit hero card -->
-          <div class="rounded-2xl bg-lime-300 p-5 text-text shadow-xs sm:p-6 lg:col-span-2">
+          <div class="rounded-2xl bg-lime-300 p-5 text-[#0A0A0A] shadow-xs dark:bg-lime-900/50 dark:text-lime-50 sm:p-6 lg:col-span-2">
             <div class="flex items-center justify-between gap-2">
-              <span class="inline-flex items-center gap-1.5 rounded-full bg-success px-3 py-1 text-[11px] font-black uppercase tracking-wider text-white">
+              <span class="inline-flex items-center gap-1.5 rounded-full bg-success px-3 py-1 text-[11px] font-black uppercase tracking-wider text-[#052E16]">
                 {{ locale === 'ar' ? 'صافي الربح' : 'Net Profit' }}
               </span>
               <button
                 type="button"
-                class="flex h-8 w-8 items-center justify-center rounded-full text-text transition-colors hover:bg-black/10"
+                class="flex h-8 w-8 items-center justify-center rounded-full text-[#0A0A0A] transition-colors hover:bg-black/10 dark:text-lime-50 dark:hover:bg-white/10"
                 :aria-label="hideAmounts ? (locale === 'ar' ? 'إظهار المبالغ' : 'Show amounts') : (locale === 'ar' ? 'إخفاء المبالغ' : 'Hide amounts')"
                 @click="hideAmounts = !hideAmounts"
               >
@@ -572,14 +572,14 @@ async function removeExpense(e: Expense) {
                 <Eye v-else class="h-4 w-4" aria-hidden="true" />
               </button>
             </div>
-            <p class="mt-4 text-xs font-medium text-text">
+            <p class="mt-4 text-xs font-medium text-[#0A0A0A] dark:text-lime-50">
               {{ locale === 'ar' ? 'أرباح هذه الفترة' : 'Your Profit' }}
             </p>
             <div class="mt-1 flex flex-wrap items-center gap-2">
               <p class="font-heading text-4xl font-black tracking-tight sm:text-5xl">
                 {{ money(Number(summary.profit || 0)) }}
               </p>
-              <span class="rounded-full bg-surface/70 px-2.5 py-1 text-[11px] font-black text-success">
+              <span class="rounded-full bg-white/60 px-2.5 py-1 text-[11px] font-black text-[#14532D] dark:bg-black/30 dark:text-lime-200">
                 {{ profitMargin }}% {{ locale === 'ar' ? 'هامش' : 'margin' }}
               </span>
             </div>
@@ -591,12 +591,12 @@ async function removeExpense(e: Expense) {
               <span class="font-semibold opacity-70">{{ t('admin.finVsPrev') }}</span>
             </span>
             <div class="mt-5 grid grid-cols-2 gap-2.5">
-              <div class="rounded-xl bg-surface/60 p-3">
-                <p class="text-[11px] font-semibold text-muted">{{ locale === 'ar' ? 'طلبات تم تسليمها' : 'Delivered Orders' }}</p>
+              <div class="rounded-xl bg-white/50 p-3 dark:bg-black/25">
+                <p class="text-[11px] font-semibold text-[#0A0A0A]/60 dark:text-lime-100/70">{{ locale === 'ar' ? 'طلبات تم تسليمها' : 'Delivered Orders' }}</p>
                 <p class="mt-1 font-heading text-xl font-black">{{ formatInt(deliveredCount) }}</p>
               </div>
-              <div class="rounded-xl bg-surface/60 p-3">
-                <p class="text-[11px] font-semibold text-muted">{{ locale === 'ar' ? 'وحدات مباعة' : 'Units Sold' }}</p>
+              <div class="rounded-xl bg-white/50 p-3 dark:bg-black/25">
+                <p class="text-[11px] font-semibold text-[#0A0A0A]/60 dark:text-lime-100/70">{{ locale === 'ar' ? 'وحدات مباعة' : 'Units Sold' }}</p>
                 <p class="mt-1 font-heading text-xl font-black">{{ formatInt(itemsSold) }}</p>
               </div>
             </div>
@@ -1037,7 +1037,7 @@ async function removeExpense(e: Expense) {
 
     <!-- Expense modal (shared by overview + expenses tab) -->
     <Teleport to="body">
-        <div v-if="expModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs" role="dialog" aria-modal="true">
+        <div v-if="expModalOpen" class="admin-shell fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs" role="dialog" aria-modal="true">
           <div class="w-full max-w-md rounded-xl border bg-surface p-5 shadow-2xl">
             <div class="mb-4 flex items-center justify-between">
               <h3 class="font-heading text-base font-bold text-text">

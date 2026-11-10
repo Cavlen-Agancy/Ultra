@@ -194,7 +194,7 @@ const quickActions = computed(() => [
         <NuxtLink
           v-if="canCreateProduct"
           :to="localePath('/admin/products/new')"
-          class="inline-flex h-9 items-center gap-1.5 rounded-md bg-primary px-3.5 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          class="inline-flex h-9 items-center gap-1.5 rounded-md bg-primary px-3.5 text-xs font-semibold text-on-primary shadow-xs transition-colors hover:bg-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
         >
           <Plus class="h-4 w-4" aria-hidden="true" />
           <span>{{ locale === 'ar' ? 'منتج جديد' : 'Add Product' }}</span>
@@ -476,7 +476,7 @@ const quickActions = computed(() => [
         >
           <div class="space-y-2.5">
             <div class="flex items-center justify-between">
-              <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-white dark:text-accent dark:group-hover:bg-accent dark:group-hover:text-on-accent">
+              <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-on-primary dark:text-accent dark:group-hover:bg-accent dark:group-hover:text-on-accent">
                 <component :is="action.icon" class="h-5 w-5" aria-hidden="true" />
               </div>
               <ArrowUpRight class="h-4 w-4 text-muted opacity-60 transition-all group-hover:opacity-100 group-hover:text-primary dark:group-hover:text-accent rtl:rotate-270" aria-hidden="true" />

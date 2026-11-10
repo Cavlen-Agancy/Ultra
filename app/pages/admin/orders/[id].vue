@@ -373,7 +373,7 @@ function formatDate(d: string) {
                 <a
                   :href="`/api/invoices/${linkedInvoice.invoice.id}/pdf`"
                   target="_blank" download
-                  class="inline-flex h-9 items-center gap-1.5 rounded-md bg-primary px-3.5 text-xs font-bold text-white shadow-xs hover:bg-accent-hover"
+                  class="inline-flex h-9 items-center gap-1.5 rounded-md bg-primary px-3.5 text-xs font-bold text-on-primary shadow-xs hover:bg-accent-hover"
                 >
                   <Download class="h-3.5 w-3.5" aria-hidden="true" />
                   <span>{{ locale === 'ar' ? 'تحميل الفاتورة' : 'Download Invoice' }}</span>
@@ -452,7 +452,7 @@ function formatDate(d: string) {
       <Teleport to="body">
         <div
           v-if="deliverConfirmOpen"
-          class="fixed inset-0 z-[70] flex items-center justify-center bg-ink-950/60 p-4 backdrop-blur-sm"
+          class="admin-shell fixed inset-0 z-[70] flex items-center justify-center bg-ink-950/60 p-4 backdrop-blur-sm"
           role="dialog"
           aria-modal="true"
           @click.self="cancelDelivery"

@@ -45,10 +45,13 @@ async function login() {
 }
 
 useHead(() => ({ title: `Admin Login | ${t('brand.name')}` }))
+
+// Admin login uses the default layout, but still needs admin dark-mode tokens.
+useHead({ bodyAttrs: { class: 'admin-shell' } })
 </script>
 
 <template>
-  <div class="flex min-h-screen flex-col justify-between bg-bg text-text px-4 py-8">
+  <div class="admin-shell flex min-h-screen flex-col justify-between bg-bg text-text px-4 py-8">
     <!-- Top Bar: Back to Store & Toggles -->
     <div class="mx-auto flex w-full max-w-md items-center justify-between">
       <NuxtLink
@@ -156,7 +159,7 @@ useHead(() => ({ title: `Admin Login | ${t('brand.name')}` }))
         <button
           type="submit"
           :disabled="pending"
-          class="mt-6 flex h-10 w-full items-center justify-center rounded-md bg-primary px-4 text-xs font-bold text-white shadow-xs transition-colors hover:bg-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-50"
+          class="mt-6 flex h-10 w-full items-center justify-center rounded-md bg-primary px-4 text-xs font-bold text-on-primary shadow-xs transition-colors hover:bg-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-50"
         >
           <span>{{ pending ? (locale === 'ar' ? 'جاري التحقق…' : 'Authenticating…') : (locale === 'ar' ? 'تسجيل الدخول' : 'Sign in to Admin') }}</span>
         </button>

@@ -12,20 +12,44 @@ export default <Partial<Config>>{
   theme: {
     extend: {
       colors: {
-        // Ultra brand palette — restrained red accent on black/white.
+        // Direct brand tokens, driven by CSS variables from main.css.
+        'brand-red': 'var(--brand-red)',
+        'brand-red-dark': 'var(--brand-red-dark)',
+        // `ink` doubles as the flat brand token and the legacy admin scale
+        // (`bg-ink-950`, `dark:hover:bg-ink-800`) used across the admin panel.
+        ink: {
+          DEFAULT: 'var(--ink)',
+          50: '#FAFAFA',
+          100: '#F5F5F5',
+          200: '#E5E5E5',
+          300: '#D4D4D4',
+          400: '#A3A3A3',
+          500: '#737373',
+          600: '#525252',
+          700: '#404040',
+          800: '#262626',
+          900: '#171717',
+          950: '#0A0A0A',
+        },
+        'ink-soft': 'var(--ink-soft)',
+        surface: 'var(--surface)',
+        'surface-gray': 'var(--surface-gray)',
+        'grid-line': 'var(--grid-line)',
+
+        // Long-lived legacy palette kept for admin/internal compatibility.
         ultra: {
           50: '#FFF1F0',
           100: '#FFE0DE',
           200: '#FFC7C5',
           300: '#FFA09C',
           400: '#F66A65',
-          500: '#D2312D',
-          600: '#B72724',
-          700: '#981F1D',
+          500: '#D32F2F',
+          600: '#B71C1C',
+          700: '#961818',
           800: '#7D1C1B',
           900: '#681B1A',
         },
-        ink: {
+        ink2: {
           50: '#FAFAFA',
           100: '#F5F5F5',
           200: '#E5E5E5',
@@ -47,36 +71,31 @@ export default <Partial<Config>>{
           500: '#737373',
         },
 
-        // Layer 2: semantic tokens (mode-aware via CSS vars) — components use these
+        // Semantic tokens, still mode-aware through CSS vars.
         bg: 'rgb(var(--bg) / <alpha-value>)',
-        surface: 'rgb(var(--surface) / <alpha-value>)',
         text: 'rgb(var(--text) / <alpha-value>)',
-        muted: 'rgb(var(--muted) / <alpha-value>)',
+        muted: 'var(--text-muted)',
         border: 'rgb(var(--border) / <alpha-value>)',
         primary: 'rgb(var(--primary) / <alpha-value>)',
         'on-primary': 'rgb(var(--on-primary) / <alpha-value>)',
-        accent: 'rgb(var(--accent) / <alpha-value>)',
-        'accent-hover': 'rgb(var(--accent-hover) / <alpha-value>)',
-        'on-accent': 'rgb(var(--on-accent) / <alpha-value>)',
-        // Deeper red for text/links on white surfaces
-        'accent-text': 'rgb(var(--accent-text) / <alpha-value>)',
+        accent: 'var(--brand-red)',
+        'accent-hover': 'var(--brand-red-dark)',
+        'on-accent': '#FFFFFF',
+        // Deeper red for text/links on white surfaces.
+        'accent-text': 'var(--brand-red-dark)',
 
-        // Status tokens (fixed in both modes)
         success: '#22C55E',
         error: '#EF4444',
         warning: '#F59E0B',
       },
       backgroundImage: {
-        // Ultra primary CTA gradient.
-        'ultra-gradient': 'linear-gradient(135deg, #D2312D 0%, #B72724 100%)',
+        // Almost invisible geometric grid pattern for light brand sections.
+        'ultra-grid': 'var(--ultra-grid-pattern)',
       },
       boxShadow: {
-        // Restrained Ultra CTA shadow.
-        ultra: '0 10px 30px -16px rgb(210 49 45 / 0.28)',
+        ultra: '0 12px 40px -20px rgb(0 0 0 / 0.32)',
       },
       fontFamily: {
-        // Language-aware stacks — resolved from CSS vars so the typeface
-        // follows html[lang] (Arabic vs English). See assets/css/main.css.
         display: ['var(--font-display)'],
         heading: ['var(--font-heading)'],
         body: ['var(--font-body)'],
@@ -92,8 +111,8 @@ export default <Partial<Config>>{
         '4xl': '36px',
       },
       borderRadius: {
-        sm: '4px',
-        DEFAULT: '6px',
+        sm: '2px',
+        DEFAULT: '4px',
         md: '8px',
         lg: '12px',
       },

@@ -1087,7 +1087,7 @@ const inputCls = 'h-10 w-full rounded-md border bg-surface px-3 text-sm transiti
             <button
               type="button"
               :disabled="!videoUrlInput.trim()"
-              class="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-md bg-primary px-4 text-xs font-semibold text-white hover:bg-accent-hover disabled:opacity-50 transition-colors"
+              class="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-md bg-primary px-4 text-xs font-semibold text-on-primary hover:bg-accent-hover disabled:opacity-50 transition-colors"
               @click="attachVideoUrl"
             >
               <span>{{ locale === 'ar' ? 'إرفاق الرابط' : 'Attach Video' }}</span>
@@ -1183,7 +1183,7 @@ const inputCls = 'h-10 w-full rounded-md border bg-surface px-3 text-sm transiti
             <button
               type="button"
               :disabled="!docFile"
-              class="inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-md bg-primary px-4 text-xs font-semibold text-white hover:bg-accent-hover disabled:opacity-50 transition-colors w-full sm:w-auto"
+              class="inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-md bg-primary px-4 text-xs font-semibold text-on-primary hover:bg-accent-hover disabled:opacity-50 transition-colors w-full sm:w-auto"
               @click="addDocument"
             >
               <UploadCloud class="h-3.5 w-3.5" />

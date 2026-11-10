@@ -41,7 +41,7 @@ const siteDisplayName = computed(() => general.value?.siteNameEn || general.valu
             </span>
           </NuxtLink>
 
-          <p class="mt-5 max-w-sm text-sm leading-7 text-white/60">
+          <p class="mt-5 max-w-sm text-sm leading-7 text-white/75">
             {{ t('brand.longDesc') }}
           </p>
 
@@ -52,32 +52,32 @@ const siteDisplayName = computed(() => general.value?.siteNameEn || general.valu
 
         <div class="md:col-span-2">
           <h2 class="eyebrow !text-white/60">{{ locale === 'ar' ? 'تسوق' : 'Shop' }}</h2>
-          <ul class="mt-4 space-y-3 text-sm text-white/65">
-            <li><NuxtLink :to="localePath('/products')" class="transition-colors hover:text-white">{{ t('nav.allProducts') }}</NuxtLink></li>
+          <ul class="mt-4 space-y-3 text-sm text-white/75">
+            <li><NuxtLink :to="localePath('/products')" class="text-white/80 transition-colors hover:text-brand-red hover:underline">{{ t('nav.allProducts') }}</NuxtLink></li>
             <li v-for="c in (categories?.categories || []).slice(0, 4)" :key="c.slug">
-              <NuxtLink :to="localePath(`/products/${c.slug}`)" class="transition-colors hover:text-white">
+              <NuxtLink :to="localePath(`/products/${c.slug}`)" class="text-white/80 transition-colors hover:text-brand-red hover:underline">
                 {{ locale === 'ar' ? c.nameAr : c.nameEn }}
               </NuxtLink>
             </li>
-            <li><NuxtLink :to="localePath('/cart')" class="transition-colors hover:text-white">{{ t('nav.cart') }}</NuxtLink></li>
+            <li><NuxtLink :to="localePath('/cart')" class="text-white/80 transition-colors hover:text-brand-red hover:underline">{{ t('nav.cart') }}</NuxtLink></li>
           </ul>
         </div>
 
         <div :class="hasContact ? 'md:col-span-2' : 'md:col-span-3'">
           <h2 class="eyebrow !text-white/60">{{ locale === 'ar' ? 'المتجر' : 'Store' }}</h2>
-          <ul class="mt-4 space-y-3 text-sm text-white/65">
-            <li><NuxtLink :to="localePath('/')" class="transition-colors hover:text-white">{{ t('nav.home') }}</NuxtLink></li>
-            <li><NuxtLink :to="localePath('/products')" class="transition-colors hover:text-white">{{ t('nav.products') }}</NuxtLink></li>
-            <li><NuxtLink :to="localePath('/admin/login')" class="transition-colors hover:text-white">{{ t('nav.login') }}</NuxtLink></li>
+          <ul class="mt-4 space-y-3 text-sm text-white/75">
+            <li><NuxtLink :to="localePath('/')" class="text-white/80 transition-colors hover:text-brand-red hover:underline">{{ t('nav.home') }}</NuxtLink></li>
+            <li><NuxtLink :to="localePath('/products')" class="text-white/80 transition-colors hover:text-brand-red hover:underline">{{ t('nav.products') }}</NuxtLink></li>
+            <li><NuxtLink :to="localePath('/admin/login')" class="text-white/80 transition-colors hover:text-brand-red hover:underline">{{ t('nav.login') }}</NuxtLink></li>
           </ul>
         </div>
 
         <div v-if="hasContact" class="md:col-span-3">
           <h2 class="eyebrow !text-white/60">{{ locale === 'ar' ? 'تواصل' : 'Contact' }}</h2>
-          <ul class="mt-4 space-y-3 text-sm text-white/65">
+          <ul class="mt-4 space-y-3 text-sm text-white/75">
             <li v-if="contact?.contactPhone1" class="flex items-start gap-2.5">
               <Phone class="mt-0.5 h-4 w-4 shrink-0 text-ultra-400" aria-hidden="true" />
-              <a :href="`tel:${contact.contactPhone1}`" class="transition-colors hover:text-white" dir="ltr">{{ contact.contactPhone1 }}</a>
+              <a :href="`tel:${contact.contactPhone1}`" class="text-white/80 transition-colors hover:text-brand-red hover:underline" dir="ltr">{{ contact.contactPhone1 }}</a>
             </li>
             <li v-if="contact?.contactEmail" class="flex items-start gap-2.5">
               <Mail class="mt-0.5 h-4 w-4 shrink-0 text-ultra-400" aria-hidden="true" />

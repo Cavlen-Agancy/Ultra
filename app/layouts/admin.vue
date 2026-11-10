@@ -1,13 +1,17 @@
 <script setup lang="ts">
 const mobileOpen = ref(false)
 
+// Scope admin dark-mode tokens (surfaces, muted text, native controls) to the
+// admin shell so the intentionally light storefront is unaffected.
+useHead({ bodyAttrs: { class: 'admin-shell' } })
+
 onMounted(() => {
   useAdminPush()
 })
 </script>
 
 <template>
-  <div class="min-h-screen bg-bg text-text lg:flex">
+  <div class="admin-shell min-h-screen bg-bg text-text lg:flex">
     <!-- Collapsible/Persistent Admin Sidebar -->
     <AdminSidebar
       :mobile-open="mobileOpen"

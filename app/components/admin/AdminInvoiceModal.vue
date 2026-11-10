@@ -57,7 +57,7 @@ onUnmounted(() => {
   <Teleport to="body">
     <div
       data-invoice-print-root
-      class="fixed inset-0 z-[70] flex items-start justify-center overflow-y-auto bg-ink-950/60 p-4 backdrop-blur-sm print:p-0"
+      class="admin-shell fixed inset-0 z-[70] flex items-start justify-center overflow-y-auto bg-ink-950/60 p-4 backdrop-blur-sm print:p-0"
       role="dialog"
       aria-modal="true"
       @click.self="$emit('close')"
@@ -71,7 +71,7 @@ onUnmounted(() => {
               :href="`/api/invoices/${data.invoice.id}/pdf`"
               target="_blank"
               download
-              class="inline-flex h-10 items-center gap-1.5 rounded-md bg-primary px-4 text-xs font-bold text-white shadow-xs transition-colors hover:bg-accent-hover"
+              class="inline-flex h-10 items-center gap-1.5 rounded-md bg-primary px-4 text-xs font-bold text-on-primary shadow-xs transition-colors hover:bg-accent-hover"
             >
               <Download class="h-4 w-4" aria-hidden="true" />
               <span>{{ locale === 'ar' ? 'تحميل PDF' : 'Download PDF' }}</span>

@@ -86,7 +86,7 @@ function handlePrint() {
             <a
               :href="`/api/invoices/${invoice.id}/pdf`"
               target="_blank" download
-              class="inline-flex h-9 items-center gap-1.5 rounded-md bg-primary px-3.5 text-xs font-bold text-white shadow-xs hover:bg-accent-hover"
+              class="inline-flex h-9 items-center gap-1.5 rounded-md bg-primary px-3.5 text-xs font-bold text-on-primary shadow-xs hover:bg-accent-hover"
             >
               <Download class="h-3.5 w-3.5" aria-hidden="true" />
               <span>{{ locale === 'ar' ? 'تحميل PDF' : 'Download PDF' }}</span>

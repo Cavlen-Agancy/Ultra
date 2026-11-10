@@ -382,7 +382,7 @@ async function saveManualInvoice() {
 
     <!-- Manual create modal -->
     <Teleport to="body">
-      <div v-if="createOpen" class="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/60 p-4 backdrop-blur-xs" role="dialog" aria-modal="true">
+      <div v-if="createOpen" class="admin-shell fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/60 p-4 backdrop-blur-xs" role="dialog" aria-modal="true">
         <div class="my-8 w-full max-w-2xl rounded-xl border bg-surface shadow-2xl">
           <div class="flex items-center justify-between border-b px-5 py-4" :style="{ borderColor: 'var(--color-border)' }">
             <h3 class="font-heading text-base font-bold text-text">

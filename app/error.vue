@@ -24,7 +24,7 @@ const handleError = () => clearError({ redirect: '/' })
           {{ error?.message || 'Something went wrong on our end. Please try again later.' }}
         </template>
       </p>
-      <button @click="handleError" class="h-12 inline-flex items-center justify-center rounded bg-primary px-8 font-bold text-white hover:bg-accent-hover transition-colors">
+      <button @click="handleError" class="h-12 inline-flex items-center justify-center rounded bg-primary px-8 font-bold text-on-primary hover:bg-accent-hover transition-colors">
         Go Back Home
       </button>
     </div>

@@ -142,7 +142,7 @@ const adminName = computed(() =>
   <div class="mx-auto w-full max-w-[794px]">
     <div
       ref="sheetRef"
-      class="invoice-sheet relative overflow-hidden bg-surface p-8 shadow-md print:p-0 print:shadow-none"
+      class="invoice-sheet relative overflow-hidden bg-white p-8 shadow-md print:p-0 print:shadow-none"
       :class="density"
       dir="rtl"
     >

@@ -648,7 +648,7 @@ async function insertImage() {
         />
 
         <!-- Active Width Indicator Tag -->
-        <span class="absolute -top-6 start-0 rounded bg-primary px-1.5 py-0.5 text-[10px] font-mono font-bold text-white shadow-xs">
+        <span class="absolute -top-6 start-0 rounded bg-primary px-1.5 py-0.5 text-[10px] font-mono font-bold text-on-primary shadow-xs">
           {{ currentWidthPercent }}%
         </span>
       </div>
@@ -864,7 +864,7 @@ async function insertImage() {
           <button
             type="button"
             :disabled="!imageFile || uploadingImage"
-            class="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg bg-primary px-5 text-xs font-bold text-white hover:bg-accent-hover disabled:opacity-50 transition-all"
+            class="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg bg-primary px-5 text-xs font-bold text-on-primary hover:bg-accent-hover disabled:opacity-50 transition-all"
             @click="insertImage"
           >
             <span>{{ uploadingImage ? (locale === 'ar' ? 'جاري الرفع…' : 'Uploading…') : (locale === 'ar' ? 'إدراج الصورة' : 'Insert Image') }}</span>

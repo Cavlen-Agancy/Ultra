@@ -84,7 +84,7 @@ const userInitials = computed(() => {
 
       <!-- User avatar badge -->
       <div v-if="data?.user" class="hidden sm:flex items-center gap-2.5">
-        <div class="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-bold text-white shadow-sm">
+        <div class="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-bold text-on-primary shadow-sm">
           {{ userInitials }}
         </div>
         <div class="text-xs leading-tight">

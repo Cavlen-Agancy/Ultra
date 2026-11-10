@@ -1,7 +1,5 @@
 <script setup lang="ts">
 import {
-  ArrowLeft,
-  ChevronDown,
   LayoutDashboard,
   Loader2,
   LogIn,
@@ -16,7 +14,6 @@ const localePath = useLocalePath()
 const route = useRoute()
 
 const mobileOpen = ref(false)
-const shopOpen = ref(false)
 const searchBarOpen = ref(false)
 const searchInputRef = ref<HTMLInputElement | null>(null)
 const searchQuery = ref('')
@@ -42,7 +39,6 @@ const { data: generalSettings } = await useAsyncData('navbar-settings-general', 
 
 const productsHref = computed(() => localePath('/products'))
 const brandName = computed(() => generalSettings.value?.siteNameEn || generalSettings.value?.siteNameAr || t('brand.name'))
-
 const isProductsActive = computed(() =>
   route.path === productsHref.value
   || route.path.startsWith(`${productsHref.value}/`)
@@ -52,12 +48,6 @@ const isProductsActive = computed(() =>
 function toggleLocale() {
   setLocale(locale.value === 'ar' ? 'en' : 'ar')
   mobileOpen.value = false
-}
-
-function onShopFocusOut(event: FocusEvent) {
-  const next = event.relatedTarget as Node | null
-  if (next && (event.currentTarget as HTMLElement).contains(next)) return
-  shopOpen.value = false
 }
 
 function toggleSearchBar() {
@@ -116,7 +106,6 @@ function submitNavSearch() {
 
 function closeMobile() {
   mobileOpen.value = false
-  shopOpen.value = false
 }
 
 watch(() => route.fullPath, () => {
@@ -134,7 +123,6 @@ function handleKeydown(e: KeyboardEvent) {
   if (e.key !== 'Escape') return
   if (searchBarOpen.value) closeSearchBar()
   if (mobileOpen.value) closeMobile()
-  if (shopOpen.value) shopOpen.value = false
 }
 
 onMounted(() => {
@@ -149,11 +137,11 @@ onBeforeUnmount(() => {
 
 <template>
   <header data-site-header class="sticky top-0 z-40 border-b border-black/10 bg-white">
-    <div class="container-editorial flex h-16 items-center justify-between gap-4">
-      <div class="flex items-center gap-5 lg:gap-8">
+    <div class="container-editorial relative flex h-[72px] items-center justify-between">
+      <div class="flex items-center gap-3">
         <button
           type="button"
-          class="-ms-1 flex h-10 w-10 items-center justify-center text-black md:hidden"
+          class="-ms-2 flex h-10 w-10 items-center justify-center text-black transition-colors hover:text-brand-red md:hidden"
           :aria-label="mobileOpen ? 'Close menu' : 'Open menu'"
           :aria-expanded="mobileOpen"
           aria-controls="mobile-menu"
@@ -163,95 +151,34 @@ onBeforeUnmount(() => {
           <Menu v-else class="h-5 w-5" aria-hidden="true" />
         </button>
 
-        <NuxtLink
-          :to="localePath('/')"
-          class="group flex min-w-[92px] items-center gap-2.5 focus-visible:outline-none"
-          aria-label="Ultra home"
-        >
-          <img
-            v-if="generalSettings?.logoPath"
-            :src="generalSettings.logoPath"
-            :alt="brandName"
-            class="h-8 w-auto object-contain"
-          />
-          <span v-else class="font-display text-xl font-bold uppercase tracking-[0.22em] text-black">
-            {{ brandName }}
-          </span>
-        </NuxtLink>
-
-        <nav class="hidden items-center gap-6 md:flex" aria-label="Main navigation">
-          <NuxtLink
-            :to="localePath('/')"
-            class="text-[12px] font-semibold uppercase tracking-[0.12em] text-black/65 transition-colors hover:text-black"
-          >
+        <nav class="hidden items-center gap-7 md:flex" aria-label="Main navigation">
+          <NuxtLink :to="localePath('/')" class="text-[12px] font-bold uppercase tracking-[0.13em] text-[#5A5A5A] transition-colors hover:text-black">
             {{ t('nav.home') }}
           </NuxtLink>
-
-          <div
-            class="relative"
-            @mouseenter="shopOpen = true"
-            @mouseleave="shopOpen = false"
-            @focusin="shopOpen = true"
-            @focusout="onShopFocusOut"
-          >
-            <NuxtLink
-              :to="productsHref"
-              class="inline-flex items-center gap-1.5 text-[12px] font-semibold uppercase tracking-[0.12em] transition-colors"
-              :class="isProductsActive ? 'border-b-2 border-ultra-500 pb-0.5 text-black' : 'text-black/65 hover:text-black'"
-              aria-haspopup="true"
-              :aria-expanded="shopOpen"
-              :aria-current="isProductsActive ? 'page' : undefined"
-              aria-controls="shop-menu"
-            >
-              <span>{{ t('nav.products') }}</span>
-              <ChevronDown class="h-3 w-3" aria-hidden="true" />
-            </NuxtLink>
-
-            <Transition
-              enter-active-class="transition duration-150 ease-out"
-              enter-from-class="-translate-y-1 opacity-0"
-              enter-to-class="translate-y-0 opacity-100"
-              leave-active-class="transition duration-100 ease-in"
-              leave-from-class="translate-y-0 opacity-100"
-              leave-to-class="-translate-y-1 opacity-0"
-            >
-              <div
-                v-if="shopOpen"
-                id="shop-menu"
-                class="absolute start-0 top-full z-50 w-[min(560px,calc(100vw-2rem))] pt-4"
-              >
-                <div class="border border-black/10 bg-white p-5 shadow-[0_18px_50px_-28px_rgba(0,0,0,0.45)]">
-                  <div class="mb-4 flex items-center justify-between border-b border-black/10 pb-3">
-                    <span class="eyebrow">{{ locale === 'ar' ? 'تسوق' : 'Shop' }}</span>
-                    <NuxtLink :to="productsHref" class="text-xs font-semibold text-black link-underline">
-                      {{ t('nav.allProducts') }}
-                    </NuxtLink>
-                  </div>
-                  <div class="grid grid-cols-2 gap-x-6 gap-y-1">
-                    <NuxtLink
-                      v-for="c in navCats?.categories || []"
-                      :key="c.slug"
-                      :to="`${productsHref}/${c.slug}`"
-                      class="flex items-center justify-between border-b border-black/5 py-2.5 text-sm text-black/70 transition-colors hover:text-black"
-                      @click="shopOpen = false"
-                    >
-                      <span class="truncate">{{ locale === 'ar' ? c.nameAr : c.nameEn }}</span>
-                      <span v-if="c.isVip" class="ms-2 text-[10px] font-bold uppercase tracking-wider text-ultra-600">VIP</span>
-                    </NuxtLink>
-                  </div>
-                </div>
-              </div>
-            </Transition>
-          </div>
-
           <NuxtLink
-            :to="localePath('/products')"
-            class="text-[12px] font-semibold uppercase tracking-[0.12em] text-black/65 transition-colors hover:text-black"
+            :to="productsHref"
+            class="text-[12px] font-bold uppercase tracking-[0.13em] transition-colors"
+            :class="isProductsActive ? 'text-brand-red underline decoration-2 underline-offset-4' : 'text-[#5A5A5A] hover:text-black'"
           >
-            {{ locale === 'ar' ? 'كل المنتجات' : 'All products' }}
+            {{ t('nav.products') }}
           </NuxtLink>
         </nav>
       </div>
+
+      <NuxtLink
+        :to="localePath('/')"
+        class="group absolute left-1/2 top-1/2 z-20 flex -translate-x-1/2 -translate-y-1/2 items-center gap-2.5 min-w-[120px] sm:min-w-[160px]"
+        aria-label="Ultra Store home"
+      >
+        <img
+          :src="generalSettings?.logoPath || '/logo.png'"
+          :alt="brandName"
+          class="h-10 w-auto object-contain transition-transform group-hover:scale-105"
+        />
+        <span class="font-display text-[20px] font-bold uppercase tracking-[0.22em] text-black">
+          {{ brandName }}
+        </span>
+      </NuxtLink>
 
       <div class="flex items-center gap-1 sm:gap-2">
         <button
@@ -265,7 +192,7 @@ onBeforeUnmount(() => {
 
         <button
           type="button"
-          class="flex h-10 w-10 items-center justify-center text-black transition-colors hover:text-ultra-500"
+          class="flex h-10 w-10 items-center justify-center text-black transition-colors hover:text-brand-red"
           :aria-label="locale === 'ar' ? 'بحث' : 'Search'"
           :aria-expanded="searchBarOpen"
           aria-controls="site-search"
@@ -277,7 +204,7 @@ onBeforeUnmount(() => {
 
         <NuxtLink
           :to="isAdminLoggedIn ? localePath('/admin') : localePath('/admin/login')"
-          class="hidden h-10 w-10 items-center justify-center text-black transition-colors hover:text-ultra-500 sm:flex"
+          class="hidden h-10 w-10 items-center justify-center text-black transition-colors hover:text-brand-red sm:flex"
           :aria-label="isAdminLoggedIn ? t('nav.dashboard') : t('nav.login')"
         >
           <LayoutDashboard v-if="isAdminLoggedIn" class="h-5 w-5" aria-hidden="true" />
@@ -286,14 +213,14 @@ onBeforeUnmount(() => {
 
         <NuxtLink
           :to="localePath('/cart')"
-          class="relative flex h-10 items-center gap-2 px-1 text-black transition-colors hover:text-ultra-500"
+          class="relative flex h-10 items-center gap-2 px-1 text-black transition-colors hover:text-brand-red"
           :aria-label="`${t('nav.cart')} (${cartStore.itemCount})`"
         >
           <ShoppingBag class="h-5 w-5" aria-hidden="true" />
           <span class="hidden text-[11px] font-bold uppercase tracking-[0.14em] lg:inline">{{ t('nav.cart') }}</span>
           <span
             v-if="cartStore.itemCount"
-            class="flex h-5 min-w-5 items-center justify-center bg-ultra-500 px-1 text-[10px] font-bold text-white"
+            class="flex h-5 min-w-5 items-center justify-center bg-brand-red px-1 text-[10px] font-bold text-white"
           >
             {{ cartStore.itemCount }}
           </span>
@@ -318,11 +245,7 @@ onBeforeUnmount(() => {
           <div class="mx-auto w-full max-w-3xl">
             <div class="flex items-center justify-between">
               <span class="eyebrow">{{ locale === 'ar' ? 'ابحث في المتجر' : 'Search the store' }}</span>
-              <button
-                type="button"
-                class="text-xs font-semibold text-black/55 hover:text-black"
-                @click="closeSearchBar"
-              >
+              <button type="button" class="text-xs font-semibold text-black/55 hover:text-black" @click="closeSearchBar">
                 {{ locale === 'ar' ? 'إغلاق' : 'Close' }}
               </button>
             </div>
@@ -341,7 +264,7 @@ onBeforeUnmount(() => {
                 :aria-label="locale === 'ar' ? 'بحث في المتجر' : 'Search the store'"
                 class="h-10 flex-1 bg-transparent px-3 text-base text-black placeholder:text-black/35 focus:outline-none"
               />
-              <button type="submit" class="text-xs font-bold uppercase tracking-[0.14em] text-ultra-600">
+              <button type="submit" class="text-xs font-bold uppercase tracking-[0.14em] text-brand-red">
                 {{ locale === 'ar' ? 'بحث' : 'Search' }}
               </button>
             </form>
@@ -357,38 +280,27 @@ onBeforeUnmount(() => {
                 >
                   <div class="flex min-w-0 items-center gap-3">
                     <div class="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden bg-[#F7F7F7]">
-                      <img
-                        v-if="item.coverImage"
-                        :src="item.coverImage"
-                        :alt="locale === 'ar' ? item.nameAr : item.nameEn"
-                        class="h-full w-full object-cover"
-                        loading="lazy"
-                      />
+                      <img v-if="item.coverImage" :src="item.coverImage" :alt="locale === 'ar' ? item.nameAr : item.nameEn" class="h-full w-full object-cover" loading="lazy" />
                       <ShoppingBag v-else class="h-4 w-4 text-black/30" />
                     </div>
                     <div class="min-w-0">
                       <p class="truncate text-sm font-medium text-black">{{ locale === 'ar' ? item.nameAr : item.nameEn }}</p>
-                      <p v-if="item.category" class="truncate text-[11px] text-black/60">
-                        {{ locale === 'ar' ? item.category.nameAr : item.category.nameEn }}
-                      </p>
+                      <p v-if="item.category" class="truncate text-[11px] text-black/60">{{ locale === 'ar' ? item.category.nameAr : item.category.nameEn }}</p>
                     </div>
                   </div>
                   <span class="shrink-0 text-sm font-semibold text-black">{{ money(item.price) }}</span>
                 </NuxtLink>
                 <NuxtLink
                   :to="localePath(`/products?search=${encodeURIComponent(searchQuery.trim())}`)"
-                  class="flex items-center justify-center gap-2 px-3 py-3 text-xs font-bold uppercase tracking-[0.14em] text-ultra-600"
+                  class="flex items-center justify-center gap-2 px-3 py-3 text-xs font-bold uppercase tracking-[0.14em] text-brand-red"
                   @click="closeSearchBar"
                 >
                   {{ locale === 'ar' ? `عرض كل النتائج (${searchTotalMatches})` : `View all results (${searchTotalMatches})` }}
-                  <ArrowLeft class="h-3.5 w-3.5 rtl:rotate-180" aria-hidden="true" />
                 </NuxtLink>
               </div>
               <div v-else-if="!searchLoading" class="px-4 py-8 text-center">
-                <p class="text-sm text-black/55">
-                  {{ locale === 'ar' ? 'لا توجد نتائج مطابقة.' : 'No matching products.' }}
-                </p>
-                <NuxtLink :to="productsHref" class="mt-3 inline-block text-xs font-bold uppercase tracking-[0.14em] text-ultra-600" @click="closeSearchBar">
+                <p class="text-sm text-black/55">{{ locale === 'ar' ? 'لا توجد نتائج مطابقة.' : 'No matching products.' }}</p>
+                <NuxtLink :to="productsHref" class="mt-3 inline-block text-xs font-bold uppercase tracking-[0.14em] text-brand-red" @click="closeSearchBar">
                   {{ locale === 'ar' ? 'تصفح كل المنتجات' : 'Browse all products' }}
                 </NuxtLink>
               </div>
@@ -409,7 +321,7 @@ onBeforeUnmount(() => {
       <div
         v-if="mobileOpen"
         id="mobile-menu"
-        class="fixed inset-x-0 top-16 bottom-0 z-50 overflow-y-auto border-t border-black/10 bg-white md:hidden"
+        class="fixed inset-x-0 top-[72px] bottom-0 z-50 overflow-y-auto border-t border-black/10 bg-white md:hidden"
         role="dialog"
         aria-modal="true"
         aria-label="Mobile navigation"
@@ -430,7 +342,7 @@ onBeforeUnmount(() => {
               @click="closeMobile"
             >
               <span>{{ locale === 'ar' ? c.nameAr : c.nameEn }}</span>
-              <span v-if="c.isVip" class="text-[10px] font-bold uppercase tracking-wider text-ultra-600">VIP</span>
+              <span v-if="c.isVip" class="text-[10px] font-bold uppercase tracking-wider text-brand-red">VIP</span>
             </NuxtLink>
           </nav>
 

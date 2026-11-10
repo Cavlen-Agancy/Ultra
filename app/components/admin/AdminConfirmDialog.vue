@@ -82,8 +82,8 @@ const confirmText = computed(() =>
           </button>
           <button
             type="button"
-            class="inline-flex h-9 items-center rounded-md px-5 text-xs font-bold text-white shadow-xs transition-all active:scale-[0.98]"
-            :class="pending.danger ? 'bg-error hover:bg-error' : 'bg-primary hover:bg-accent-hover'"
+            class="inline-flex h-9 items-center rounded-md px-5 text-xs font-bold shadow-xs transition-all active:scale-[0.98]"
+            :class="pending.danger ? 'bg-error text-white hover:bg-error' : 'bg-primary text-on-primary hover:bg-accent-hover'"
             @click="resolvePending(true)"
           >
             {{ confirmText }}

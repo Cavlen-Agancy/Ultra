@@ -91,7 +91,7 @@ const userInitials = computed(() => {
     <!-- Sidebar Container: sticky on desktop so long tables scroll beside it;
          `start-0` keeps it glued to the correct side in RTL. Collapsible on desktop. -->
     <aside
-      class="fixed inset-y-0 start-0 z-50 flex flex-col justify-between border-e border-border bg-ink-950 text-text transition-all duration-300 ease-in-out lg:sticky lg:top-0 lg:h-screen lg:shrink-0 lg:translate-x-0"
+      class="fixed inset-y-0 start-0 z-50 flex flex-col justify-between border-e border-white/10 bg-ink-950 text-white transition-all duration-300 ease-in-out lg:sticky lg:top-0 lg:h-screen lg:shrink-0 lg:translate-x-0"
       :class="[
         mobileOpen ? 'w-64 translate-x-0 shadow-2xl' : 'max-lg:-translate-x-full max-lg:rtl:translate-x-full',
         collapsed ? 'lg:w-20' : 'lg:w-64'
@@ -100,7 +100,7 @@ const userInitials = computed(() => {
       <div class="flex min-h-0 flex-1 flex-col">
         <!-- Brand Header with Collapse Toggle -->
         <div
-          class="relative flex h-16 shrink-0 items-center border-b border-border transition-all"
+          class="relative flex h-16 shrink-0 items-center border-b border-white/10 transition-all"
           :class="collapsed ? 'justify-center px-2' : 'justify-between px-4'"
         >
           <!-- Expanded Brand -->
@@ -112,7 +112,7 @@ const userInitials = computed(() => {
           >
             <div class="leading-tight min-w-0">
               <span class="font-heading text-sm font-bold tracking-tight text-white block truncate">{{ t('brand.name') }}</span>
-              <span class="block text-[10px] font-medium tracking-wider text-muted uppercase">Admin Panel</span>
+              <span class="block text-[10px] font-medium tracking-wider text-white/55 uppercase">Admin Panel</span>
             </div>
           </NuxtLink>
 
@@ -130,8 +130,8 @@ const userInitials = computed(() => {
           <!-- Desktop Collapse / Expand Toggle Button -->
           <button
             type="button"
-            class="hidden lg:flex h-7 w-7 items-center justify-center rounded-md text-muted hover:bg-surface/10 hover:text-white transition-colors"
-            :class="collapsed ? 'absolute -end-3.5 top-4.5 z-50 bg-ink-950 border border-border shadow-md rounded-full text-white' : ''"
+            class="hidden lg:flex h-7 w-7 items-center justify-center rounded-md text-white/60 hover:bg-white/10 hover:text-white transition-colors"
+            :class="collapsed ? 'absolute -end-3.5 top-4.5 z-50 bg-ink-950 border border-white/10 shadow-md rounded-full text-white' : ''"
             :title="collapsed ? (locale === 'ar' ? 'توسيع القائمة الجانبية' : 'Expand sidebar') : (locale === 'ar' ? 'طي القائمة الجانبية' : 'Collapse sidebar')"
             :aria-label="collapsed ? (locale === 'ar' ? 'توسيع القائمة الجانبية' : 'Expand sidebar') : (locale === 'ar' ? 'طي القائمة الجانبية' : 'Collapse sidebar')"
             @click="toggleCollapse"
@@ -142,7 +142,7 @@ const userInitials = computed(() => {
           <!-- Mobile Close Drawer Button -->
           <button
             type="button"
-            class="flex h-8 w-8 items-center justify-center rounded-md text-muted hover:bg-surface/10 hover:text-white lg:hidden"
+            class="flex h-8 w-8 items-center justify-center rounded-md text-white/60 hover:bg-white/10 hover:text-white lg:hidden"
             aria-label="Close sidebar"
             @click="$emit('close-mobile')"
           >
@@ -154,7 +154,7 @@ const userInitials = computed(() => {
         <nav class="min-h-0 flex-1 overflow-y-auto p-2.5" aria-label="Admin Navigation">
           <p
             v-if="!collapsed"
-            class="mb-2 px-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted"
+            class="mb-2 px-2.5 text-[11px] font-semibold uppercase tracking-wider text-white/50"
           >
             {{ locale === 'ar' ? 'القائمة الرئيسية' : 'Main Menu' }}
           </p>
@@ -168,7 +168,7 @@ const userInitials = computed(() => {
                     collapsed ? 'h-10 w-10 justify-center mx-auto p-0' : 'gap-3 px-3 py-2.5',
                     isItemActive(item.to)
                       ? 'bg-accent text-on-accent shadow-xs font-semibold'
-                      : 'text-muted hover:bg-surface/10 hover:text-white'
+                      : 'text-white/60 hover:bg-white/10 hover:text-white'
                   ]"
                   :title="collapsed ? item.label : undefined"
                   @click="$emit('close-mobile')"
@@ -193,13 +193,13 @@ const userInitials = computed(() => {
       </div>
 
       <!-- Footer section with View Store & User Card -->
-      <div class="shrink-0 border-t border-border p-2.5 space-y-2">
+      <div class="shrink-0 border-t border-white/10 p-2.5 space-y-2">
         <!-- View Store Button (Moved into Sidebar) -->
         <NuxtLink
           :to="localePath('/')"
           target="_blank"
           rel="noopener noreferrer"
-          class="group flex items-center rounded-md text-xs font-semibold text-muted transition-colors hover:bg-surface/10 hover:text-white border border-white/5"
+          class="group flex items-center rounded-md text-xs font-semibold text-white/60 transition-colors hover:bg-white/10 hover:text-white border border-white/5"
           :class="collapsed ? 'h-9 w-9 justify-center mx-auto p-0' : 'h-9 w-full gap-2.5 px-3'"
           :title="locale === 'ar' ? 'عرض المتجر في نافذة جديدة' : 'Open public store in a new tab'"
         >
@@ -209,16 +209,16 @@ const userInitials = computed(() => {
 
         <!-- User card -->
         <div
-          class="flex items-center rounded-md bg-surface/5 transition-all"
+          class="flex items-center rounded-md bg-white/5 transition-all"
           :class="collapsed ? 'justify-center p-1.5' : 'gap-3 p-2.5'"
           :title="collapsed ? `${data?.user.name} (${data?.user.email})` : undefined"
         >
-          <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-white shadow-xs">
+          <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-on-primary shadow-xs">
             {{ userInitials }}
           </div>
           <div v-if="!collapsed" class="min-w-0 flex-1">
             <p class="truncate text-xs font-semibold text-white">{{ data?.user.name }}</p>
-            <p class="truncate text-[11px] text-muted">{{ data?.user.email }}</p>
+            <p class="truncate text-[11px] text-white/55">{{ data?.user.email }}</p>
             <span
               v-if="data?.user.isSuper"
               class="mt-0.5 inline-block rounded-full bg-accent/20 px-1.5 py-0.2 text-[9px] font-bold tracking-wider text-accent uppercase"
@@ -231,7 +231,7 @@ const userInitials = computed(() => {
         <!-- Logout button -->
         <button
           type="button"
-          class="flex items-center justify-center rounded-md border border-white/10 text-xs font-medium text-muted transition-colors hover:border-error/40 hover:bg-error/10 hover:text-error"
+          class="flex items-center justify-center rounded-md border border-white/10 text-xs font-medium text-white/60 transition-colors hover:border-error/40 hover:bg-error/10 hover:text-error"
           :class="collapsed ? 'h-9 w-9 mx-auto p-0' : 'w-full gap-2 px-3 py-2'"
           :title="collapsed ? t('admin.logout') : undefined"
           @click="adminLogout"
