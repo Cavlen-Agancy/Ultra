@@ -1,0 +1,95 @@
+# Production stack for Ultra.
+# Nginx Proxy Manager (container `nginx-proxy-manager`) owns ports 80/443 and
+# reaches the app here by container name `ultra_app:3000` over the external
+# Docker network `proxy`. NOTHING is published to the host.
+#
+# Secrets live ONLY in the server-side `.env` at the project root (never in
+# the repo). `deploy.sh` runs: build -> migrate -> app.
+name: ultra
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: ultra_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ultra
+      POSTGRES_DB: ultra_db
+      # Required via interpolation from .env — stack refuses to start without it.
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:?required}"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ultra -d ultra_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    mem_limit: 1g
+    cpus: 1.0
+    networks:
+      - internal
+
+  # One-shot migration job. Same image as app, pull_policy never (built on the
+  # server by deploy.sh), never restarted.
+  migrate:
+    image: ultra-app:prod
+    pull_policy: never
+    container_name: ultra_migrate
+    restart: "no"
+    command: ["npx", "prisma", "migrate", "deploy"]
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+    mem_limit: 512m
+    cpus: 0.5
+    networks:
+      - internal
+
+  app:
+    image: ultra-app:prod
+    pull_policy: never
+    build:
+      context: .
+    container_name: ultra_app
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      NITRO_HOST: 0.0.0.0
+      NITRO_PORT: "3000"
+    expose:
+      - "3000"
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    volumes:
+      - uploads:/app/public/uploads
+      - storage:/app/storage
+    mem_limit: 1g
+    cpus: 1.0
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/health').then(r=>{process.exit(r.ok?0:1)}).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
+    networks:
+      - internal
+      - proxy
+
+volumes:
+  pgdata:
+  uploads:
+  storage:
+
+networks:
+  internal:
+  # External shared network with nginx-proxy-manager.
+  proxy:
+    external: true

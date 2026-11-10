@@ -1,0 +1,30 @@
+# Keep the build context minimal and secret-free.
+node_modules
+.git
+.env
+.env.*
+.env*
+.pnpm-store
+
+# Build artifacts (rebuilt in the image)
+.output
+.nuxt
+.nitro
+.data
+.cache
+dist
+
+# Local runtime data & backups (never enter an image)
+backups
+storage
+public/uploads
+
+# Non-app assets & docs
+docs
+*.md
+
+# Logs & misc
+logs
+*.log
+.DS_Store
+.idea

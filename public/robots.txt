@@ -1,0 +1,5 @@
+User-Agent: *
+Disallow:
+
+# Replace with the real Ultra domain before launch.
+Sitemap: https://ultra.example.com/sitemap.xml

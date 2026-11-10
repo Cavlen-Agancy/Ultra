@@ -1,0 +1,535 @@
+// Ultra domain schema.
+// This is the source of truth for fresh database initialization.
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Admin & RBAC ──────────────────────────────────────────────
+
+model AdminUser {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  passwordHash String
+  title        String?
+  salary       Decimal? @db.Decimal(10, 2)
+  phone        String?
+  isSuper      Boolean  @default(false)
+  isActive     Boolean  @default(true)
+  lastLoginAt  DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  permissions   AdminPermission[]
+  statusChanges OrderStatusHistory[]
+  deviceTokens  AdminDeviceToken[]
+  notifications AdminNotification[]
+}
+
+model AdminPermission {
+  id         String @id @default(cuid())
+  userId     String
+  permission String
+
+  user AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, permission])
+  @@index([userId])
+}
+
+// ─── Catalog ───────────────────────────────────────────────────
+
+enum CategoryType {
+  NORMAL
+  VIP
+}
+
+model Category {
+  id                 String   @id @default(cuid())
+  nameAr             String
+  nameEn             String
+  slug               String   @unique
+  descriptionAr      String?  @db.Text
+  descriptionEn      String?  @db.Text
+  coverImagePath     String?
+  coverVideoUrl      String?
+  featuredOnHomepage Boolean  @default(false)
+  sortOrder          Int      @default(0)
+  type               CategoryType  @default(NORMAL)
+  vipPasswordHash    String?
+  vipAccessVersion   Int           @default(0)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  products           Product[]
+  productCategories  ProductCategory[]
+  vipAccessGrants    VipCategoryAccess[]
+
+  @@index([type])
+  @@index([featuredOnHomepage])
+}
+
+model Product {
+  id             String   @id @default(cuid())
+  nameAr         String
+  nameEn         String
+  slug           String   @unique
+  descriptionAr  String?  @db.Text
+  descriptionEn  String?  @db.Text
+  price          Decimal  @db.Decimal(10, 2)
+  compareAtPrice Decimal? @db.Decimal(10, 2)
+  costPrice      Decimal? @db.Decimal(10, 2)
+  stock          Int      @default(0)
+  minStock       Int      @default(5)
+  categoryId     String
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  category   Category           @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  categories ProductCategory[]
+  images     ProductImage[]
+  attributes ProductAttribute[]
+  seo        ProductSeo?
+  orderItems OrderItem[]
+  video      ProductVideo?
+  documents  ProductDocument[]
+  movements  StockMovement[]
+
+  @@index([categoryId])
+  @@index([isActive])
+  @@index([createdAt])
+  @@index([nameAr])
+  @@index([nameEn])
+  @@index([stock])
+}
+
+model ProductImage {
+  id        String  @id @default(cuid())
+  productId String
+  path      String
+  altAr     String?
+  altEn     String?
+  sortOrder Int     @default(0)
+  isCover   Boolean @default(false)
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+}
+
+model ProductCategory {
+  productId  String
+  categoryId String
+  createdAt  DateTime @default(now())
+
+  product  Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+
+  @@id([productId, categoryId])
+  @@index([productId])
+  @@index([categoryId])
+}
+
+model VipCategoryAccess {
+  id                    String   @id @default(cuid())
+  categoryId            String
+  sessionIdHash         String
+  passwordVersionAtGrant Int
+  expiresAt             DateTime
+  createdAt             DateTime @default(now())
+
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([categoryId, sessionIdHash])
+  @@index([categoryId, sessionIdHash])
+  @@index([expiresAt])
+  @@index([sessionIdHash])
+}
+
+model ProductAttribute {
+  id        String @id @default(cuid())
+  productId String
+  keyAr     String
+  keyEn     String
+  valueAr   String
+  valueEn   String
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+}
+
+model ProductSeo {
+  id                String  @id @default(cuid())
+  productId         String  @unique
+  metaTitleAr       String?
+  metaTitleEn       String?
+  metaDescriptionAr String? @db.Text
+  metaDescriptionEn String? @db.Text
+  keywords          String?
+  geoContent        String? @db.Text
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+model ProductVideo {
+  id        String   @id @default(cuid())
+  productId String   @unique
+  type      String   // 'youtube' | 'vimeo' | 'upload'
+  url       String
+  createdAt DateTime @default(now())
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+model ProductDocument {
+  id        String   @id @default(cuid())
+  productId String
+  labelAr   String
+  labelEn   String
+  filePath  String
+  fileType  String   @default("pdf")
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+}
+
+// ─── Orders ────────────────────────────────────────────────────
+
+model Order {
+  id                 String   @id @default(cuid())
+  orderNumber        String   @unique
+  customerName       String
+  customerPhone      String
+  customerEmail      String?
+  customerAddress    String?  @db.Text
+  customerGovernorat String
+  totalAmount        Decimal  @db.Decimal(10, 2)
+  paymentMethod      String   @default("COD")
+  paymentStatus      String   @default("not_applicable") // pending | paid | failed | cancelled | expired | not_applicable
+  paymentProvider    String?
+  paymentChargeId    String?
+  paymentReference   String?
+  paymentAmount      Decimal? @db.Decimal(10, 2)
+  paymentCurrency    String?  @default("XXX")
+  paymentVerifiedAt  DateTime?
+  paymentFailureReason String?
+  status             String   @default("Pending")
+  stockDeducted      Boolean  @default(false)
+  refundReason       String? // 'customer_request' | 'damaged' | 'wrong_item' | 'other'
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  items         OrderItem[]
+  statusHistory OrderStatusHistory[]
+  invoice       Invoice?
+
+  @@index([status])
+  @@index([createdAt])
+  @@index([customerPhone])
+  @@index([paymentStatus])
+  @@index([paymentChargeId])
+  @@unique([paymentProvider, paymentChargeId])
+}
+
+model OrderItem {
+  id                   String   @id @default(cuid())
+  orderId              String
+  productId            String?
+  productNameSnapshot  String
+  productPriceSnapshot Decimal  @db.Decimal(10, 2)
+  productCostSnapshot  Decimal? @db.Decimal(10, 2)
+  quantity             Int
+  subtotal             Decimal  @db.Decimal(10, 2)
+
+  order   Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  @@index([orderId])
+}
+
+model OrderStatusHistory {
+  id              String   @id @default(cuid())
+  orderId         String
+  status          String
+  changedAt       DateTime @default(now())
+  changedByUserId String?
+
+  order       Order      @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  changedBy   AdminUser? @relation(fields: [changedByUserId], references: [id], onDelete: SetNull)
+
+  @@index([orderId])
+}
+
+// ─── Admin push notifications & notification center ────────────
+
+model AdminDeviceToken {
+  id          String   @id @default(cuid())
+  adminUserId String
+  fcmToken    String   @unique
+  createdAt   DateTime @default(now())
+  lastUsedAt  DateTime @default(now())
+
+  adminUser AdminUser @relation(fields: [adminUserId], references: [id], onDelete: Cascade)
+
+  @@index([adminUserId])
+}
+
+model AdminNotification {
+  id              String   @id @default(cuid())
+  adminUserId     String
+  type            String // 'new_order'
+  titleEn         String
+  titleAr         String
+  bodyEn          String
+  bodyAr          String
+  relatedEntityId String?
+  url             String?
+  isRead          Boolean  @default(false)
+  createdAt       DateTime @default(now())
+
+  adminUser AdminUser @relation(fields: [adminUserId], references: [id], onDelete: Cascade)
+
+  @@index([adminUserId, isRead])
+  @@index([adminUserId, createdAt])
+}
+
+// ─── Homepage banners ──────────────────────────────────────────
+
+model Banner {
+  id                  String   @id @default(cuid())
+  titleAr             String
+  titleEn             String
+  descriptionAr       String?  @db.Text
+  descriptionEn       String?  @db.Text
+  backgroundImagePath String?
+  buttonTextAr        String?
+  buttonTextEn        String?
+  buttonLinkType      String?
+  buttonLinkValue     String?
+  placement           String   @default("below_hero")
+  widthPercent        Int      @default(100)
+  backgroundColor     String?
+  textColor           String?
+  isActive            Boolean  @default(true)
+  sortOrder           Int      @default(0)
+  createdAt           DateTime @default(now())
+
+  @@index([placement, isActive, sortOrder])
+}
+
+// ─── Top announcement carousel items ───────────────────────────
+
+model AnnouncementItem {
+  id        String   @id @default(cuid())
+  textAr    String
+  textEn    String?
+  type      String   @default("general") // 'product' | 'general'
+  linkType  String   @default("none") // 'product' | 'url' | 'none'
+  linkValue String?
+  sortOrder Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isActive, sortOrder])
+}
+
+// ─── Site settings (singleton, id = 1) ─────────────────────────
+
+model SiteSettings {
+  id Int @id @default(autoincrement())
+
+  siteNameAr String  @default("Ultra")
+  siteNameEn String  @default("Ultra")
+  taglineAr  String? @db.Text
+  taglineEn  String? @db.Text
+  logoPath   String?
+  faviconPath String?
+  heroImagePath String?
+
+  // Neutral placeholder palette. Replace with the real Ultra brand palette later.
+  primaryDarkColor String @default("#111111")
+  primaryColor     String @default("#111111")
+  accentColor      String @default("#737373")
+
+  offerEndDate       DateTime?
+  announcementActive Boolean   @default(true)
+  announcementBgColor String   @default("#737373")
+
+  bannerTextAr       String? @db.Text
+  bannerTextEn       String? @db.Text
+  bannerButtonTextAr String?
+  bannerButtonTextEn String?
+  bannerButtonUrl    String?
+
+  contactPhone1     String?
+  contactPhone2     String?
+  contactWhatsapp   String?
+  contactEmail      String?
+  contactAddressAr  String? @db.Text
+  contactAddressEn  String? @db.Text
+  socialFacebook    String?
+  socialInstagram   String?
+  socialTiktok      String?
+  socialYoutube     String?
+  socialLinkedin    String?
+  socialX           String?
+  googleMapsEmbedUrl String? @db.Text
+
+  seoMetaTitleTemplateAr String?
+  seoMetaTitleTemplateEn String?
+  seoMetaDescriptionAr   String? @db.Text
+  seoMetaDescriptionEn   String? @db.Text
+  seoKeywords            String?
+  geoDescription         String? @db.Text
+
+  // Neutral placeholders. Set the real currency and tax rules in admin settings.
+  defaultCurrency String @default("XXX")
+  productsPerPage Int    @default(16)
+
+  vatRate         Int     @default(0)
+  pricesIncludeVat Boolean @default(false)
+  vatNumber       String?
+
+  tickerTextAr String? @db.Text
+  tickerTextEn String? @db.Text
+  tickerActive Boolean @default(false)
+  tickerSpeed  Int     @default(30)
+
+  // Meta (Facebook) Pixel + Conversions API — access token stored AES-256-GCM
+  // encrypted, mirroring paymentGatewayCredentials. Never returned raw.
+  metaPixelId      String?
+  metaCapiToken    String? @db.Text
+  metaTestEventCode String?
+  metaEnabled      Boolean @default(false)
+
+  invoiceSequenceNext Int       @default(1)
+
+  paymentCodEnabled           Boolean @default(true)
+  paymentOnlineEnabled        Boolean @default(false)
+  paymentGatewayName          String?
+  paymentGatewayMode          String?
+  paymentGatewayCredentials   String? @db.Text // AES-256-GCM encrypted JSON, never returned raw
+
+  updatedAt DateTime @updatedAt
+}
+
+// ─── Audit Log (who created / edited products, categories) ──
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  entityType String // 'product' | 'category'
+  entityId   String
+  entityName String
+  action     String // 'created' | 'updated' | 'deleted' | 'media'
+  details    String?  @db.Text
+  userId     String?
+  userName   String
+  createdAt  DateTime @default(now())
+
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}
+
+// ─── Invoices ────────────────────────────────────────────────────
+
+model Invoice {
+  id                String   @id @default(cuid())
+  invoiceNumber     String   @unique
+  customerName      String
+  customerPhone     String
+  customerGovernorat String?
+  customerAddress   String?  @db.Text
+  notes             String?  @db.Text
+  paymentMethod     String   @default("COD")
+  status            String   @default("Pending") // Paid | Pending | Cancelled
+  subtotalAmount    Decimal  @default(0) @db.Decimal(10, 2)
+  taxAmount         Decimal  @default(0) @db.Decimal(10, 2)
+  totalAmount       Decimal  @default(0) @db.Decimal(10, 2)
+  type              String   @default("manual") // order | manual
+  orderId           String?  @unique
+  order             Order?   @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  createdById       String?
+  createdByName     String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  items InvoiceItem[]
+
+  @@index([status])
+  @@index([type])
+  @@index([createdAt])
+}
+
+model InvoiceItem {
+  id        String  @id @default(cuid())
+  invoiceId String
+  name      String
+  quantity  Int     @default(1)
+  unitPrice Decimal @db.Decimal(10, 2)
+  subtotal  Decimal @db.Decimal(10, 2)
+
+  invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@index([invoiceId])
+}
+
+// ─── Inventory stock movements (audit trail for stock additions) ──
+
+model StockMovement {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  quantity  Int // +added / −deducted
+  costPrice Decimal? @db.Decimal(10, 2)
+  reason    String   @default("adjustment") // 'initial' | 'adjustment' | 'delivery'
+  userId    String?
+  userName  String?
+  createdAt DateTime @default(now())
+
+  @@index([productId])
+  @@index([createdAt])
+}
+
+// ─── Financials: expenses ────────────────────────────────────────
+
+model Expense {
+  id          String   @id @default(cuid())
+  category    String
+  description String?  @db.Text
+  amount      Decimal  @db.Decimal(10, 2)
+  month       Int
+  year        Int
+  recurring   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  @@index([year, month])
+}
+
+// ─── Customer PII access tokens ────────────────────────────────
+// Short-lived, single-resource tokens issued at order creation.
+// A valid token (or an admin session) is required to read order PII.
+
+model CustomerAccessToken {
+  id           String   @id @default(cuid())
+  tokenHash    String   @unique
+  resourceType String   // 'order'
+  resourceId   String
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+
+  @@index([resourceType, resourceId])
+  @@index([expiresAt])
+}
+
+

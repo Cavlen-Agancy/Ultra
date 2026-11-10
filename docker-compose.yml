@@ -1,0 +1,52 @@
+services:
+  ultra-db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    container_name: ultra-db
+    environment:
+      POSTGRES_USER: ultra
+      POSTGRES_PASSWORD: ultra
+      POSTGRES_DB: ultra_db
+    ports:
+      - "5434:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ultra -d ultra_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - net
+
+  ultra-app:
+    build: .
+    restart: unless-stopped
+    container_name: ultra-app
+    ports:
+      - "3000:3000"
+    environment:
+      # Single source of truth: .env
+      DATABASE_URL: "${DATABASE_URL}"
+      NUXT_SESSION_PASSWORD: "${NUXT_SESSION_PASSWORD:-dev-only-change-me-min-32-chars}"
+      NODE_ENV: production
+      NITRO_PORT: "3000"
+      NITRO_HOST: "0.0.0.0"
+    depends_on:
+      ultra-db:
+        condition: service_healthy
+    # Boot step: run migrations separately before starting the app.
+    # Uploads persist across restarts via named volumes.
+    volumes:
+      - uploads:/app/public/uploads
+      - storage:/app/storage
+    networks:
+      - net
+
+volumes:
+  pgdata:
+  uploads:
+  storage:
+
+networks:
+  net:

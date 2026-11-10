@@ -1,0 +1,44 @@
+name: Deploy Ultra
+
+# The image is built on the server, not here: this workflow only SSHes in and
+# runs the repo's deploy script (build → migrate → up → healthcheck).
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ultra-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: SSH deploy on VPS
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Run deploy.sh on the server
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+
+          # Write the deployment key and trust the host from the secret.
+          mkdir -p ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
+          printf '%s\n' "$SSH_KNOWN_HOSTS" >> ~/.ssh/known_hosts
+          chmod 700 ~/.ssh
+          chmod 600 ~/.ssh/deploy_key
+
+          SSH_OPTS="-o IdentitiesOnly=yes -o ServerAliveInterval=30 -o StrictHostKeyChecking=yes"
+
+          # The server-side script does: git pull → build (nice/ionice) →
+          # migrate → up -d app → wait for health → prune → logs.
+          ssh $SSH_OPTS -i ~/.ssh/deploy_key "$SSH_USER@$SSH_HOST" \
+            'bash -lc "cd /opt/apps/projects/ultra && ./deploy.sh"'

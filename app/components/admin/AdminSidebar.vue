@@ -1,0 +1,245 @@
+<script setup lang="ts">
+import {
+  ChevronLeft,
+  ChevronRight,
+  Crown,
+  ExternalLink,
+  FolderTree,
+  LayoutDashboard,
+  LogOut,
+  Megaphone,
+  Settings,
+  ShoppingCart,
+  Users,
+  Wallet,
+  X,
+} from 'lucide-vue-next'
+
+const props = defineProps<{
+  mobileOpen?: boolean
+}>()
+
+const emit = defineEmits<{
+  (e: 'close-mobile'): void
+}>()
+
+const { t, locale } = useI18n()
+const localePath = useLocalePath()
+const route = useRoute()
+const { data } = useAdminSession()
+
+const collapsed = useCookie<boolean>('ultra_admin_sidebar_collapsed', { default: () => false })
+function toggleCollapse() {
+  collapsed.value = !collapsed.value
+}
+
+const canProductsView = useAdminCan('products.view')
+const canCategoriesManage = useAdminCan('categories.manage')
+const canVipCategoriesView = useAdminCan('vip_categories.view')
+const canVipCategoriesManage = useAdminCan('vip_categories.manage')
+const canOrdersView = useAdminCan('orders.view')
+const canUsersManage = useAdminCan('users.manage')
+const canSettingsView = useAdminCan('settings.view')
+const canBannersManage = useAdminCan('banners.manage')
+const canFinancialsView = useAdminCan('financials.view')
+
+interface SidebarItem {
+  label: string
+  to: string
+  icon: any
+  show: boolean
+  badge?: number
+}
+
+const items = computed<SidebarItem[]>(() => [
+  { label: t('admin.dashboard'), to: '/admin', icon: LayoutDashboard, show: true },
+  { label: t('admin.products'), to: '/admin/products', icon: ShoppingCart, show: canProductsView.value },
+  { label: t('admin.categories'), to: '/admin/categories', icon: FolderTree, show: canCategoriesManage.value },
+  { label: locale.value === 'ar' ? 'أقسام VIP' : 'VIP Categories', to: '/admin/categories?tab=vip', icon: Crown, show: canVipCategoriesView.value || canVipCategoriesManage.value },
+  { label: t('admin.orders'), to: '/admin/orders', icon: ShoppingCart, show: canOrdersView.value },
+  { label: locale.value === 'ar' ? 'المالية والمصاريف' : 'Financials', to: '/admin/financials', icon: Wallet, show: canFinancialsView.value },
+  { label: locale.value === 'ar' ? 'البنرات' : 'Banners', to: '/admin/banners', icon: Megaphone, show: canBannersManage.value },
+  { label: t('admin.users'), to: '/admin/users', icon: Users, show: canUsersManage.value },
+  { label: t('admin.settings'), to: '/admin/settings', icon: Settings, show: canSettingsView.value },
+])
+
+function isItemActive(path: string) {
+  const current = route.path.replace(/^\/(en|ar)/, '') || '/'
+  const target = path.replace(/^\/(en|ar)/, '')
+  if (target === '/admin') {
+    return current === '/admin' || current === '/admin/'
+  }
+  return current === target || current.startsWith(target + '/')
+}
+
+const userInitials = computed(() => {
+  const name = data.value?.user.name || 'Admin'
+  return name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
+})
+</script>
+
+<template>
+  <div>
+    <!-- Mobile backdrop overlay -->
+    <div
+      v-if="mobileOpen"
+      class="fixed inset-0 z-40 bg-black/60 backdrop-blur-xs transition-opacity lg:hidden"
+      aria-hidden="true"
+      @click="$emit('close-mobile')"
+    />
+
+    <!-- Sidebar Container: sticky on desktop so long tables scroll beside it;
+         `start-0` keeps it glued to the correct side in RTL. Collapsible on desktop. -->
+    <aside
+      class="fixed inset-y-0 start-0 z-50 flex flex-col justify-between border-e border-border bg-ink-950 text-text transition-all duration-300 ease-in-out lg:sticky lg:top-0 lg:h-screen lg:shrink-0 lg:translate-x-0"
+      :class="[
+        mobileOpen ? 'w-64 translate-x-0 shadow-2xl' : 'max-lg:-translate-x-full max-lg:rtl:translate-x-full',
+        collapsed ? 'lg:w-20' : 'lg:w-64'
+      ]"
+    >
+      <div class="flex min-h-0 flex-1 flex-col">
+        <!-- Brand Header with Collapse Toggle -->
+        <div
+          class="relative flex h-16 shrink-0 items-center border-b border-border transition-all"
+          :class="collapsed ? 'justify-center px-2' : 'justify-between px-4'"
+        >
+          <!-- Expanded Brand -->
+          <NuxtLink
+            v-if="!collapsed"
+            :to="localePath('/admin')"
+            class="flex items-center gap-2.5 focus-visible:outline-none min-w-0"
+            @click="$emit('close-mobile')"
+          >
+            <div class="leading-tight min-w-0">
+              <span class="font-heading text-sm font-bold tracking-tight text-white block truncate">{{ t('brand.name') }}</span>
+              <span class="block text-[10px] font-medium tracking-wider text-muted uppercase">Admin Panel</span>
+            </div>
+          </NuxtLink>
+
+          <!-- Collapsed Brand Logo -->
+          <NuxtLink
+            v-else
+            :to="localePath('/admin')"
+            class="flex items-center justify-center focus-visible:outline-none"
+            :title="t('brand.name')"
+            @click="$emit('close-mobile')"
+          >
+            <span class="font-heading text-sm font-bold tracking-tight text-white">{{ t('brand.name').charAt(0) }}</span>
+          </NuxtLink>
+
+          <!-- Desktop Collapse / Expand Toggle Button -->
+          <button
+            type="button"
+            class="hidden lg:flex h-7 w-7 items-center justify-center rounded-md text-muted hover:bg-surface/10 hover:text-white transition-colors"
+            :class="collapsed ? 'absolute -end-3.5 top-4.5 z-50 bg-ink-950 border border-border shadow-md rounded-full text-white' : ''"
+            :title="collapsed ? (locale === 'ar' ? 'توسيع القائمة الجانبية' : 'Expand sidebar') : (locale === 'ar' ? 'طي القائمة الجانبية' : 'Collapse sidebar')"
+            :aria-label="collapsed ? (locale === 'ar' ? 'توسيع القائمة الجانبية' : 'Expand sidebar') : (locale === 'ar' ? 'طي القائمة الجانبية' : 'Collapse sidebar')"
+            @click="toggleCollapse"
+          >
+            <component :is="collapsed ? ChevronRight : ChevronLeft" class="h-4 w-4 rtl:rotate-180" aria-hidden="true" />
+          </button>
+
+          <!-- Mobile Close Drawer Button -->
+          <button
+            type="button"
+            class="flex h-8 w-8 items-center justify-center rounded-md text-muted hover:bg-surface/10 hover:text-white lg:hidden"
+            aria-label="Close sidebar"
+            @click="$emit('close-mobile')"
+          >
+            <X class="h-5 w-5" aria-hidden="true" />
+          </button>
+        </div>
+
+        <!-- Navigation items -->
+        <nav class="min-h-0 flex-1 overflow-y-auto p-2.5" aria-label="Admin Navigation">
+          <p
+            v-if="!collapsed"
+            class="mb-2 px-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted"
+          >
+            {{ locale === 'ar' ? 'القائمة الرئيسية' : 'Main Menu' }}
+          </p>
+          <ul class="space-y-1">
+            <template v-for="item in items" :key="item.label">
+              <li v-if="item.show">
+                <NuxtLink
+                  :to="localePath(item.to)"
+                  class="group flex items-center rounded-md text-sm font-medium transition-all"
+                  :class="[
+                    collapsed ? 'h-10 w-10 justify-center mx-auto p-0' : 'gap-3 px-3 py-2.5',
+                    isItemActive(item.to)
+                      ? 'bg-accent text-on-accent shadow-xs font-semibold'
+                      : 'text-muted hover:bg-surface/10 hover:text-white'
+                  ]"
+                  :title="collapsed ? item.label : undefined"
+                  @click="$emit('close-mobile')"
+                >
+                  <component
+                    :is="item.icon"
+                    class="h-4.5 w-4.5 shrink-0 transition-transform group-hover:scale-105"
+                    aria-hidden="true"
+                  />
+                  <span v-if="!collapsed" class="flex-1 truncate">{{ item.label }}</span>
+                  <span
+                    v-if="!collapsed && item.badge > 0"
+                    class="shrink-0 rounded-full bg-accent px-1.5 py-px text-[10px] font-black text-on-accent"
+                  >
+                    {{ item.badge > 99 ? '99+' : item.badge }}
+                  </span>
+                </NuxtLink>
+              </li>
+            </template>
+          </ul>
+        </nav>
+      </div>
+
+      <!-- Footer section with View Store & User Card -->
+      <div class="shrink-0 border-t border-border p-2.5 space-y-2">
+        <!-- View Store Button (Moved into Sidebar) -->
+        <NuxtLink
+          :to="localePath('/')"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="group flex items-center rounded-md text-xs font-semibold text-muted transition-colors hover:bg-surface/10 hover:text-white border border-white/5"
+          :class="collapsed ? 'h-9 w-9 justify-center mx-auto p-0' : 'h-9 w-full gap-2.5 px-3'"
+          :title="locale === 'ar' ? 'عرض المتجر في نافذة جديدة' : 'Open public store in a new tab'"
+        >
+          <ExternalLink class="h-4 w-4 shrink-0 text-accent transition-transform group-hover:scale-110" aria-hidden="true" />
+          <span v-if="!collapsed" class="truncate">{{ locale === 'ar' ? 'عرض المتجر' : 'View Store' }}</span>
+        </NuxtLink>
+
+        <!-- User card -->
+        <div
+          class="flex items-center rounded-md bg-surface/5 transition-all"
+          :class="collapsed ? 'justify-center p-1.5' : 'gap-3 p-2.5'"
+          :title="collapsed ? `${data?.user.name} (${data?.user.email})` : undefined"
+        >
+          <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-white shadow-xs">
+            {{ userInitials }}
+          </div>
+          <div v-if="!collapsed" class="min-w-0 flex-1">
+            <p class="truncate text-xs font-semibold text-white">{{ data?.user.name }}</p>
+            <p class="truncate text-[11px] text-muted">{{ data?.user.email }}</p>
+            <span
+              v-if="data?.user.isSuper"
+              class="mt-0.5 inline-block rounded-full bg-accent/20 px-1.5 py-0.2 text-[9px] font-bold tracking-wider text-accent uppercase"
+            >
+              Super Admin
+            </span>
+          </div>
+        </div>
+
+        <!-- Logout button -->
+        <button
+          type="button"
+          class="flex items-center justify-center rounded-md border border-white/10 text-xs font-medium text-muted transition-colors hover:border-error/40 hover:bg-error/10 hover:text-error"
+          :class="collapsed ? 'h-9 w-9 mx-auto p-0' : 'w-full gap-2 px-3 py-2'"
+          :title="collapsed ? t('admin.logout') : undefined"
+          @click="adminLogout"
+        >
+          <LogOut class="h-4 w-4 shrink-0" aria-hidden="true" />
+          <span v-if="!collapsed">{{ t('admin.logout') }}</span>
+        </button>
+      </div>
+    </aside>
+  </div>
+</template>
