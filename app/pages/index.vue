@@ -17,33 +17,57 @@ const categories = computed(() => {
 
 const products = computed(() => productData.value?.products || [])
 
-const fallbackHeroMedia = computed(() => {
-  const images: string[] = []
+interface HeroSlideMedia {
+  desktop: string | null
+  mobile: string | null
+}
+
+const fallbackHeroSlides = computed<HeroSlideMedia[]>(() => {
+  const slides: HeroSlideMedia[] = []
   for (const category of categories.value) {
-    if (category.coverImagePath) images.push(category.coverImagePath)
+    if (category.coverImagePath) {
+      slides.push({ desktop: category.coverImagePath, mobile: category.coverImagePath })
+    }
   }
   for (const product of products.value) {
-    if (product.coverImage) images.push(product.coverImage)
+    if (product.coverImage) {
+      slides.push({ desktop: product.coverImage, mobile: product.coverImage })
+    }
   }
-  return images
+  // No hero slots configured: keep the previous safe fallback imagery from
+  // category/product covers, capped at the three-slide hero length.
+  return slides.slice(0, 3)
 })
 
-const configuredHeroMedia = computed(() => {
-  const images = general.value?.heroImagePaths
-  if (Array.isArray(images) && images.length) return images.filter(Boolean) as string[]
+const configuredHeroSlides = computed<HeroSlideMedia[]>(() => {
+  const slides = general.value?.heroSlides
+  if (Array.isArray(slides)) {
+    return slides
+      .map((slide: any) => ({
+        desktop: typeof slide?.desktop === 'string' ? slide.desktop : null,
+        mobile: typeof slide?.mobile === 'string' ? slide.mobile : null,
+      }))
+      .filter((slide: HeroSlideMedia) => slide.desktop || slide.mobile)
+  }
+
   // Older cached settings payloads may only include the original single field.
-  return general.value?.heroImagePath ? [general.value.heroImagePath as string] : []
+  const images = general.value?.heroImagePaths
+  const desktopPaths = Array.isArray(images) && images.length
+    ? images.filter(Boolean) as string[]
+    : general.value?.heroImagePath
+      ? [general.value.heroImagePath as string]
+      : []
+  return desktopPaths.map(path => ({ desktop: path, mobile: path }))
 })
 
-const heroMedia = computed(() => (
-  configuredHeroMedia.value.length
-    ? configuredHeroMedia.value
-    // No hero slots configured: keep the previous safe fallback imagery from
-    // category/product covers, capped at the three-slide hero length.
-    : fallbackHeroMedia.value.slice(0, 3)
+const heroSlides = computed(() => (
+  configuredHeroSlides.value.length ? configuredHeroSlides.value : fallbackHeroSlides.value
 ))
 
-const brandPrimaryImage = computed(() => configuredHeroMedia.value[0] || null)
+const brandPrimaryImage = computed(() => {
+  const first = configuredHeroSlides.value[0]
+  return first?.desktop || first?.mobile || null
+})
 
 const headingLines = computed(() => [
   t('brand.name'),
@@ -131,7 +155,7 @@ useHead(() => {
 <template>
   <div class="bg-white text-black">
     <AppHeroSplitSlider
-      :media="heroMedia"
+      :slides="heroSlides"
       :heading-lines="headingLines"
       :subtitle="heroSubtitle"
       :cta-label="heroCtaLabel"

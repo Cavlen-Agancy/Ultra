@@ -357,9 +357,14 @@ model SiteSettings {
   faviconPath String?
   // Homepage hero slideshow. Slot 1 keeps the original single-image field;
   // slots 2 and 3 complete the three-image set managed in admin settings.
+  // Each slot's base field is its desktop image; the Mobile fields hold the
+  // optional mobile variant.
   heroImagePath  String?
   heroImagePath2 String?
   heroImagePath3 String?
+  heroMobileImagePath  String?
+  heroMobileImagePath2 String?
+  heroMobileImagePath3 String?
 
   // Neutral placeholder palette. Replace with the real Ultra brand palette later.
   primaryDarkColor String @default("#111111")

@@ -1,12 +1,17 @@
 <script setup lang="ts">
+interface HeroSlideMedia {
+  desktop?: string | null
+  mobile?: string | null
+}
+
 const props = withDefaults(defineProps<{
-  media: Array<string | null>
+  slides: HeroSlideMedia[]
   headingLines: string[]
   subtitle?: string
   ctaLabel?: string
   ctaHref?: string
 }>(), {
-  media: () => [],
+  slides: () => [],
   headingLines: () => ['Ultra Store'],
   subtitle: '',
   ctaLabel: '',
@@ -25,14 +30,19 @@ const hasFocus = ref(false)
 const prefersReducedMotion = ref(false)
 const touchStart = ref<{ x: number, y: number } | null>(null)
 
-// Each configured image is its own slide; no empty or duplicated slides.
-const slides = computed(() => {
-  const images = props.media.filter((src): src is string => Boolean(src))
-  return images.length ? images : [null]
+// Each configured slide is its own slide; no empty or duplicated slides.
+const slideItems = computed<HeroSlideMedia[]>(() => {
+  const normalized = props.slides
+    .map(slide => ({
+      desktop: slide?.desktop || null,
+      mobile: slide?.mobile || null,
+    }))
+    .filter(slide => slide.desktop || slide.mobile)
+  return normalized.length ? normalized : [{ desktop: null, mobile: null }]
 })
-const canNavigate = computed(() => slides.value.length > 1)
+const canNavigate = computed(() => slideItems.value.length > 1)
 const paused = computed(() => isHovered.value || hasFocus.value || prefersReducedMotion.value)
-const safeIndex = computed(() => activeIndex.value % slides.value.length)
+const safeIndex = computed(() => activeIndex.value % slideItems.value.length)
 const isRtl = computed(() => locale.value === 'ar')
 
 let autoplayTimer: ReturnType<typeof setInterval> | null = null
@@ -53,18 +63,18 @@ function restartAutoplay() {
 
 function nextSlide() {
   if (!canNavigate.value) return
-  activeIndex.value = (safeIndex.value + 1) % slides.value.length
+  activeIndex.value = (safeIndex.value + 1) % slideItems.value.length
   restartAutoplay()
 }
 
 function prevSlide() {
   if (!canNavigate.value) return
-  activeIndex.value = (safeIndex.value - 1 + slides.value.length) % slides.value.length
+  activeIndex.value = (safeIndex.value - 1 + slideItems.value.length) % slideItems.value.length
   restartAutoplay()
 }
 
 function goToSlide(index: number) {
-  if (index < 0 || index >= slides.value.length) return
+  if (index < 0 || index >= slideItems.value.length) return
   activeIndex.value = index
   restartAutoplay()
 }
@@ -164,20 +174,26 @@ onBeforeUnmount(() => {
   >
     <div class="absolute inset-0">
       <div
-        v-for="(src, index) in slides"
-        :key="`${index}-${src || 'empty'}`"
+        v-for="(slide, index) in slideItems"
+        :key="`${index}-${slide.desktop || slide.mobile || 'empty'}`"
         class="absolute inset-0 bg-ink-soft transition-opacity duration-700 motion-reduce:transition-none"
         :class="index === safeIndex ? 'opacity-100' : 'opacity-0'"
         :aria-hidden="index === safeIndex ? undefined : 'true'"
       >
-        <img
-          v-if="src"
-          :src="src"
-          alt=""
-          class="h-full w-full object-cover object-center transition-transform duration-700 group-hover:scale-105 motion-reduce:transition-none motion-reduce:transform-none"
-          loading="eager"
-          decoding="async"
-        />
+        <picture v-if="slide.desktop || slide.mobile">
+          <source
+            v-if="slide.desktop && slide.mobile"
+            media="(min-width: 768px)"
+            :srcset="slide.desktop || undefined"
+          />
+          <img
+            :src="slide.mobile || slide.desktop || undefined"
+            alt=""
+            class="h-full w-full object-cover object-center transition-transform duration-700 group-hover:scale-105 motion-reduce:transition-none motion-reduce:transform-none"
+            loading="eager"
+            decoding="async"
+          />
+        </picture>
       </div>
     </div>
 
@@ -212,7 +228,7 @@ onBeforeUnmount(() => {
     <template v-if="canNavigate">
       <div class="absolute bottom-4 left-1/2 z-30 flex w-fit -translate-x-1/2 items-center gap-0.5 sm:bottom-6">
         <button
-          v-for="(slide, index) in slides"
+          v-for="(slide, index) in slideItems"
           :key="index"
           type="button"
           class="group/indicator flex h-6 w-6 items-center justify-center border-0 bg-transparent p-0"
@@ -229,8 +245,8 @@ onBeforeUnmount(() => {
     </template>
 
     <div class="sr-only" aria-live="polite">
-      <template v-if="slides.length > 1">
-        {{ locale === 'ar' ? `الشريحة ${safeIndex + 1} من ${slides.length}` : `Slide ${safeIndex + 1} of ${slides.length}` }}
+      <template v-if="slideItems.length > 1">
+        {{ locale === 'ar' ? `الشريحة ${safeIndex + 1} من ${slideItems.length}` : `Slide ${safeIndex + 1} of ${slideItems.length}` }}
       </template>
       <template v-else>Hero</template>
     </div>

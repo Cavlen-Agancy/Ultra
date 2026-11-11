@@ -2,7 +2,7 @@ import { defineEventHandler, readMultipartFormData, createError } from 'h3'
 import { requirePermission } from '../../../utils/auth'
 import { prisma } from '../../../utils/prisma'
 import { assertImagePart, storeFile } from '../../../utils/storage'
-import { heroImageSlotData, parseHeroImageSlot } from '../../../utils/hero-images'
+import { heroImageSlotData, parseHeroImageSlot, parseHeroImageVariant } from '../../../utils/hero-images'
 
 export default defineEventHandler(async (event) => {
   await requirePermission(event, 'settings.manage')
@@ -19,18 +19,20 @@ export default defineEventHandler(async (event) => {
   assertImagePart({ type: file.type, data: file.data })
 
   const slotPart = formData.find(part => part.name === 'slot')
+  const variantPart = formData.find(part => part.name === 'variant')
   const slot = parseHeroImageSlot(slotPart?.data.toString('utf8'))
+  const variant = parseHeroImageVariant(variantPart?.data.toString('utf8'))
   const { relativePath } = await storeFile(
     file.data,
     'settings',
-    `hero-${slot}-${Date.now()}-${file.filename}`,
+    `hero-${slot}-${variant}-${Date.now()}-${file.filename}`,
   )
-  const data = heroImageSlotData(slot, relativePath)
+  const data = heroImageSlotData(slot, variant, relativePath)
 
   await prisma.siteSettings.upsert({
     where: { id: 1 },
     update: data,
     create: { siteNameAr: 'Ultra', siteNameEn: 'Ultra', ...data },
   })
-  return { success: true, slot, path: relativePath }
+  return { success: true, slot, variant, path: relativePath }
 })
