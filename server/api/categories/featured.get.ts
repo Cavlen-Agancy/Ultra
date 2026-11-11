@@ -5,7 +5,6 @@ export default defineEventHandler(async () => {
     take: 6,
     select: {
       id: true,
-      type: true,
       nameAr: true,
       nameEn: true,
       slug: true,
@@ -24,7 +23,6 @@ export default defineEventHandler(async () => {
       take: 6 - categories.length,
       select: {
         id: true,
-        type: true,
         nameAr: true,
         nameEn: true,
         slug: true,
@@ -36,7 +34,5 @@ export default defineEventHandler(async () => {
     categories = [...categories, ...extra]
   }
 
-  return {
-    categories: categories.map(({ type, ...rest }) => ({ ...rest, isVip: type === 'VIP' })),
-  }
+  return { categories }
 })

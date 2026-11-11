@@ -168,13 +168,16 @@ useHead(() => {
       :items="quickLinks"
     />
 
-    <AppTaglineSection
-      class="mt-12"
-      :heading="t('brand.name')"
-      :paragraph="locale === 'ar'
-        ? 'نصمم المتجر خارج صفحات المنتج، طالما التجربة تظل سهلة للمستخدم.'
-        : 'We are committed to keeping you connected with confidence. Whatever you need, we gear you up for it.'"
-    />
+    <section class="mt-12">
+      <div class="container-editorial">
+        <img
+          src="/banner1.jpeg"
+          :alt="t('brand.name')"
+          class="mx-auto block h-auto w-full max-w-[900px] object-contain"
+          loading="lazy"
+        >
+      </div>
+    </section>
 
     <section class="py-14 sm:py-20">
       <div class="container-editorial">

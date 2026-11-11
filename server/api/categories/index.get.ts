@@ -13,7 +13,6 @@ export default defineEventHandler(async (event) => {
 
   const select = {
     id: true,
-    type: true,
     nameAr: true,
     nameEn: true,
     slug: true,
@@ -26,15 +25,10 @@ export default defineEventHandler(async (event) => {
     _count: { select: { products: { where: { isActive: true } } } },
   }
 
-  const shape = (row: any) => {
-    const { type, ...rest } = row
-    const vip = type === 'VIP'
-    return {
-      ...rest,
-      isVip: vip,
-      productCount: vip ? 0 : rest._count?.products ?? 0,
-    }
-  }
+  const shape = (row: any) => ({
+    ...row,
+    productCount: row._count?.products ?? 0,
+  })
 
   // Pagination is opt-in: only when `page` or `limit` query params are present.
   // This keeps existing callers (navbar dropdown, filter chips) on the full list.

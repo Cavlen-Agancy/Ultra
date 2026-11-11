@@ -2,7 +2,6 @@
 import {
   ChevronLeft,
   ChevronRight,
-  Crown,
   ExternalLink,
   FolderTree,
   LayoutDashboard,
@@ -35,8 +34,6 @@ function toggleCollapse() {
 
 const canProductsView = useAdminCan('products.view')
 const canCategoriesManage = useAdminCan('categories.manage')
-const canVipCategoriesView = useAdminCan('vip_categories.view')
-const canVipCategoriesManage = useAdminCan('vip_categories.manage')
 const canOrdersView = useAdminCan('orders.view')
 const canUsersManage = useAdminCan('users.manage')
 const canSettingsView = useAdminCan('settings.view')
@@ -55,7 +52,6 @@ const items = computed<SidebarItem[]>(() => [
   { label: t('admin.dashboard'), to: '/admin', icon: LayoutDashboard, show: true },
   { label: t('admin.products'), to: '/admin/products', icon: ShoppingCart, show: canProductsView.value },
   { label: t('admin.categories'), to: '/admin/categories', icon: FolderTree, show: canCategoriesManage.value },
-  { label: locale.value === 'ar' ? 'أقسام VIP' : 'VIP Categories', to: '/admin/categories?tab=vip', icon: Crown, show: canVipCategoriesView.value || canVipCategoriesManage.value },
   { label: t('admin.orders'), to: '/admin/orders', icon: ShoppingCart, show: canOrdersView.value },
   { label: locale.value === 'ar' ? 'المالية والمصاريف' : 'Financials', to: '/admin/financials', icon: Wallet, show: canFinancialsView.value },
   { label: locale.value === 'ar' ? 'البنرات' : 'Banners', to: '/admin/banners', icon: Megaphone, show: canBannersManage.value },

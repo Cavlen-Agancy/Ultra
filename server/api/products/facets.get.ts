@@ -3,22 +3,11 @@ export default defineEventHandler(async (event) => {
   const where: Record<string, unknown> = { isActive: true }
 
   if (typeof q.category === 'string' && q.category) {
-    const cat = await prisma.category.findUnique({ where: { slug: q.category } })
+    const cat = await prisma.category.findUnique({ where: { slug: q.category }, select: { id: true } })
     if (!cat) {
       return { minPrice: 0, maxPrice: 0, attributes: [] }
     }
-    if (cat.type === 'VIP') {
-      const { hasVipGrantBySlug } = await import('../../utils/vip-access')
-      if (!(await hasVipGrantBySlug(event, cat.slug))) {
-        return { minPrice: 0, maxPrice: 0, attributes: [] }
-      }
-    }
     where.categories = { some: { categoryId: cat.id } }
-    if (cat.type !== 'VIP') {
-      const conditions: any[] = where.AND ? [...(Array.isArray(where.AND) ? where.AND : [where.AND])] : []
-      conditions.push({ categories: { none: { category: { type: 'VIP' } } } })
-      where.AND = conditions
-    }
   }
 
   if (typeof q.search === 'string' && q.search.trim()) {
@@ -29,12 +18,6 @@ export default defineEventHandler(async (event) => {
       { nameAr: { contains: s, mode: 'insensitive' } },
     ] })
     where.AND = conditions
-  }
-
-  if (!where.AND) {
-    where.AND = [{ categories: { none: { category: { type: 'VIP' } } } }]
-  } else if (Array.isArray(where.AND) && !where.AND.some((cond: any) => cond.categories?.none?.category?.type === 'VIP')) {
-    ;(where.AND as any[]).push({ categories: { none: { category: { type: 'VIP' } } } })
   }
 
   const [priceAgg, rawAttributes] = await Promise.all([

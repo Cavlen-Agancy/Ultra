@@ -33,7 +33,6 @@ export default defineEventHandler(async (event) => {
       price: true,
       nameEn: true,
       costPrice: true,
-      categories: { select: { category: { select: { id: true, type: true } } } },
     },
   })
   
@@ -42,23 +41,6 @@ export default defineEventHandler(async (event) => {
   }
 
   const productMap = new Map(dbProducts.map(p => [p.id, p]))
-
-  for (const dbp of dbProducts as any[]) {
-    const vipCategories = Array.isArray(dbp.categories)
-      ? dbp.categories.map((x: any) => x.category).filter((c: any) => c?.type === 'VIP')
-      : []
-    if (vipCategories.length) {
-      const { hasVipGrant } = await import('../../utils/vip-access')
-      let authorized = false
-      for (const cat of vipCategories) {
-        if (await hasVipGrant(event, cat.id)) {
-          authorized = true
-          break
-        }
-      }
-      if (!authorized) throw createError({ statusCode: 403, statusMessage: 'Access to one or more products is restricted' })
-    }
-  }
 
   let totalAmount = 0
   const orderItems = []

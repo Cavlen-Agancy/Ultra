@@ -6,7 +6,6 @@ export const PERMISSION_GROUPS = {
   products: ['products.view', 'products.create', 'products.edit', 'products.delete'],
   orders: ['orders.view', 'orders.manage'],
   categories: ['categories.manage'],
-  vip_categories: ['vip_categories.view', 'vip_categories.manage'],
   banners: ['banners.manage'],
   invoices: ['invoices.view', 'invoices.manage'],
   inventory: ['inventory.view'],

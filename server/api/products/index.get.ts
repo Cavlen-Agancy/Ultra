@@ -10,37 +10,14 @@ export default defineEventHandler(async (event) => {
   const where: Record<string, unknown> = { isActive: true }
 
   const requestedCategory = typeof q.category === 'string' ? q.category.trim() : ''
-  let categoryType: string | null = null
   if (requestedCategory) {
     const category = await prisma.category.findUnique({
       where: { slug: requestedCategory },
-      select: { id: true, type: true, slug: true },
+      select: { id: true },
     })
     if (!category) return { products: [], total: 0, page, limit, pages: 0 }
 
-    if (category.type === 'VIP') {
-      const { hasVipGrantBySlug } = await import('../../utils/vip-access')
-      if (!(await hasVipGrantBySlug(event, category.slug))) {
-        throw createError({ statusCode: 404, statusMessage: 'Category not found' })
-      }
-      categoryType = 'VIP'
-      const filters: Record<string, unknown>[] = [
-        { categories: { some: { categoryId: category.id } } },
-      ]
-      where.AND = filters
-    } else {
-      categoryType = String(category.type)
-      const filters: Record<string, unknown>[] = [
-        { categories: { some: { categoryId: category.id } } },
-        { categories: { none: { category: { type: 'VIP' } } } },
-      ]
-      where.AND = filters
-    }
-  }
-
-  // All normal public discovery must exclude products assigned to any VIP category.
-  if (!requestedCategory || (typeof requestedCategory === 'string' && requestedCategory === '')) {
-    // Fall through: category handling already sets AND; still add global exclusion.
+    where.AND = [{ categories: { some: { categoryId: category.id } } }]
   }
 
   // Handle other filters and AND composition.
@@ -105,11 +82,6 @@ export default defineEventHandler(async (event) => {
       for (const cond of andConditions) compound.push(cond)
     }
     catch { /* ignore malformed filter */ }
-  }
-
-  // For all normal/non-granted listing: keep VIP product exclusion.
-  if (!requestedCategory || categoryType !== 'VIP') {
-    compound.push({ categories: { none: { category: { type: 'VIP' } } } })
   }
 
   if (compound.length) where.AND = compound

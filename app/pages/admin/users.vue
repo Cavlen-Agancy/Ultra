@@ -127,13 +127,6 @@ const RESOURCE_DEFS: ResourceDef[] = [
     ],
   },
   {
-    group: 'vip_categories',
-    actions: [
-      { key: 'view', en: 'View', ar: 'عرض', permission: 'vip_categories.view' },
-      { key: 'manage', en: 'Manage (full access)', ar: 'إدارة (صلاحية كاملة)', permission: 'vip_categories.manage' },
-    ],
-  },
-  {
     group: 'orders',
     actions: [
       { key: 'view', en: 'View', ar: 'عرض', permission: 'orders.view' },
@@ -353,7 +346,6 @@ const groupLabels: Record<string, { en: string, ar: string }> = {
   dashboard: { en: 'Dashboard', ar: 'لوحة التحكم' },
   products: { en: 'Products Management', ar: 'إدارة المنتجات' },
   categories: { en: 'Catalog Categories', ar: 'إدارة الأقسام' },
-  vip_categories: { en: 'VIP Categories', ar: 'الأقسام VIP' },
   orders: { en: 'Orders & Fulfillment', ar: 'إدارة الطلبات' },
   invoices: { en: 'Invoices', ar: 'الفواتير' },
   inventory: { en: 'Inventory', ar: 'المخزون' },

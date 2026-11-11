@@ -1,5 +1,3 @@
-import { hasVipGrantBySlug } from '../../utils/vip-access'
-
 export default defineEventHandler(async (event) => {
   const slug = getRouterParam(event, 'slug')
 
@@ -14,7 +12,7 @@ export default defineEventHandler(async (event) => {
     include: {
       categories: {
         include: {
-          category: { select: { id: true, slug: true, nameAr: true, nameEn: true, type: true } },
+          category: { select: { id: true, slug: true, nameAr: true, nameEn: true } },
         },
       },
       category: { select: { id: true, slug: true, nameAr: true, nameEn: true } },
@@ -28,23 +26,6 @@ export default defineEventHandler(async (event) => {
 
   if (!product || !product.isActive) {
     throw createError({ statusCode: 404, statusMessage: 'Product not found' })
-  }
-
-  const vipCategorySlugs = (product.categories || [])
-    .filter((item: any) => item.category?.type === 'VIP')
-    .map((item: any) => String(item.category.slug))
-
-  if (vipCategorySlugs.length) {
-    let authorized = false
-    for (const categorySlug of vipCategorySlugs) {
-      if (await hasVipGrantBySlug(event, categorySlug)) {
-        authorized = true
-        break
-      }
-    }
-    if (!authorized) {
-      throw createError({ statusCode: 404, statusMessage: 'Product not found' })
-    }
   }
 
   const sharedCategory = Array.isArray(product.categories) && product.categories.length > 0

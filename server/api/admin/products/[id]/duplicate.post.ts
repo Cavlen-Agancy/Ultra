@@ -20,14 +20,8 @@ export default defineEventHandler(async (event) => {
 
   if (!orig) throw createError({ statusCode: 404, statusMessage: 'Product not found' })
 
-  if (orig.categories.length > 0 && !actor.isSuper) {
-    const categoryTypes = new Set(orig.categories.map((c: any) => String(c.category?.type)))
-    if (categoryTypes.has('NORMAL') && !actor.permissions.includes('categories.manage')) {
-      throw createError({ statusCode: 403, statusMessage: 'Forbidden' })
-    }
-    if (categoryTypes.has('VIP') && !actor.permissions.includes('vip_categories.manage')) {
-      throw createError({ statusCode: 403, statusMessage: 'Forbidden' })
-    }
+  if (orig.categories.length > 0 && !actor.isSuper && !actor.permissions.includes('categories.manage')) {
+    throw createError({ statusCode: 403, statusMessage: 'Forbidden' })
   }
 
   const baseSlug = generateSlug(orig.nameEn || orig.nameAr) || 'product'

@@ -4,7 +4,6 @@ export default defineEventHandler(async (event) => {
     where: { slug: slug || '' },
     select: {
       id: true,
-      type: true,
       nameAr: true,
       nameEn: true,
       slug: true,
@@ -16,6 +15,5 @@ export default defineEventHandler(async (event) => {
     },
   })
   if (!row) throw createError({ statusCode: 404, statusMessage: 'Category not found' })
-  const { type, ...rest } = row
-  return { category: { ...rest, isVip: type === 'VIP' } }
+  return { category: row }
 })

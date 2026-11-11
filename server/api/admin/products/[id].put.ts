@@ -108,15 +108,10 @@ export default defineEventHandler(async (event) => {
     if (!categoryChange.length) throw createError({ statusCode: 400, statusMessage: 'At least one category is required' })
     const categoryRows = await prisma.category.findMany({
       where: { id: { in: categoryChange } },
-      select: { id: true, type: true },
+      select: { id: true },
     })
     if (categoryRows.length !== categoryChange.length) throw createError({ statusCode: 400, statusMessage: 'Category not found' })
-    const categoryTypes = [...new Set(categoryRows.map(c => String(c.type)))]
-    if (categoryTypes.length !== 1) throw createError({ statusCode: 400, statusMessage: 'Products cannot mix NORMAL and VIP categories' })
-    if (!actor.isSuper) {
-      if (categoryTypes.includes('NORMAL') && !actor.permissions.includes('categories.manage')) throw createError({ statusCode: 403, statusMessage: 'Forbidden' })
-      if (categoryTypes.includes('VIP') && !actor.permissions.includes('vip_categories.manage')) throw createError({ statusCode: 403, statusMessage: 'Forbidden' })
-    }
+    if (!actor.isSuper && !actor.permissions.includes('categories.manage')) throw createError({ statusCode: 403, statusMessage: 'Forbidden' })
     const primary = (categoryRows.find(c => c.id === categoryChange[0]) || categoryRows[0]) as any
     if (primary.id !== existing.categoryId) changes.push('غيّر القسم')
     data.categoryId = primary.id

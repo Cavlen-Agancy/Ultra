@@ -28,7 +28,7 @@ const { data: adminSession } = useAdminSession()
 const isAdminLoggedIn = computed(() => !!adminSession.value?.user)
 
 const { data: navCats } = await useAsyncData('navbar-categories', () =>
-  $fetch<{ categories: { slug: string, nameAr: string, nameEn: string, isVip?: boolean }[] }>('/api/categories'),
+  $fetch<{ categories: { slug: string, nameAr: string, nameEn: string }[] }>('/api/categories'),
   { server: true, lazy: true },
 )
 
@@ -342,7 +342,6 @@ onBeforeUnmount(() => {
               @click="closeMobile"
             >
               <span>{{ locale === 'ar' ? c.nameAr : c.nameEn }}</span>
-              <span v-if="c.isVip" class="text-[10px] font-bold uppercase tracking-wider text-brand-red">VIP</span>
             </NuxtLink>
           </nav>
 

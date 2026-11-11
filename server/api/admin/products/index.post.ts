@@ -54,24 +54,14 @@ export default defineEventHandler(async (event) => {
 
   const categoryRows = await prisma.category.findMany({
     where: { id: { in: categoryIds } },
-    select: { id: true, type: true },
+    select: { id: true },
   })
   if (categoryRows.length !== categoryIds.length) {
     throw createError({ statusCode: 400, statusMessage: 'Category not found' })
   }
 
-  const categoryTypes = [...new Set(categoryRows.map(c => String(c.type)))]
-  if (categoryTypes.length !== 1) {
-    throw createError({ statusCode: 400, statusMessage: 'Products cannot mix NORMAL and VIP categories' })
-  }
-
-  if (!actor.isSuper) {
-    if (categoryTypes.includes('NORMAL') && !actor.permissions.includes('categories.manage')) {
-      throw createError({ statusCode: 403, statusMessage: 'Forbidden' })
-    }
-    if (categoryTypes.includes('VIP') && !actor.permissions.includes('vip_categories.manage')) {
-      throw createError({ statusCode: 403, statusMessage: 'Forbidden' })
-    }
+  if (!actor.isSuper && !actor.permissions.includes('categories.manage')) {
+    throw createError({ statusCode: 403, statusMessage: 'Forbidden' })
   }
 
   const [category] = categoryRows

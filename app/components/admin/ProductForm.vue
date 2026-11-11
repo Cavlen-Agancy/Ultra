@@ -31,7 +31,6 @@ interface Category {
   nameAr: string
   nameEn: string
   slug: string
-  isVip?: boolean
 }
 interface Attr {
   keyAr: string
@@ -293,20 +292,9 @@ function goToStep(s: number) {
 
 function toggleCategory(id: string, checked: boolean) {
   const selected = new Set(form.categoryIds)
-  if (!checked) {
-    selected.delete(id)
-    form.categoryIds = [...selected]
-    return
-  }
-  const target = catData?.value?.categories?.find((c: Category) => c.id === id)
-  if (!target) return
-  form.categoryIds = [
-    ...form.categoryIds.filter((selectedId) => {
-      const category = catData?.value?.categories?.find((c: Category) => c.id === selectedId)
-      return category?.isVip === target.isVip
-    }),
-    id,
-  ]
+  if (checked) selected.add(id)
+  else selected.delete(id)
+  form.categoryIds = [...selected]
 }
 function addAttr() {
   form.attributes.push({ keyAr: '', keyEn: '', valueAr: '', valueEn: '' })
@@ -677,32 +665,25 @@ const inputCls = 'h-10 w-full rounded-md border bg-surface px-3 text-sm transiti
         <div>
           <span class="mb-1.5 block text-xs font-semibold text-text">Categories *</span>
           <div class="grid gap-3 sm:grid-cols-2">
-            <div v-for="group in ['normal', 'vip'] as const" :key="group" class="rounded-md border bg-surface p-3">
-              <p class="mb-2 text-xs font-semibold uppercase tracking-wider text-muted">
-                {{ group === 'vip' ? (locale === 'ar' ? 'VIP' : 'VIP') : (locale === 'ar' ? 'طبيعي' : 'Normal') }}
-              </p>
-              <label
-                v-for="c in (catData?.categories || []).filter((item: Category) => (group === 'vip') === Boolean(item.isVip))"
-                :key="c.id"
-                class="mb-2 flex cursor-pointer items-center gap-2 text-sm"
-              >
-                <input
-                  type="checkbox"
-                  :checked="form.categoryIds.includes(c.id)"
-                  class="h-4 w-4 rounded"
-                  @change="toggleCategory(c.id, ($event.target as HTMLInputElement).checked)"
-                />
-                <span>
-                  {{ locale === 'ar' ? (c.nameAr || c.nameEn) : c.nameEn }}
-                  <span v-if="c.isVip" class="ms-1 rounded bg-accent/20 px-1 text-[10px] font-bold text-accent">
-                    VIP
-                  </span>
-                </span>
-              </label>
-            </div>
+            <label
+              v-for="c in (catData?.categories || [])"
+              :key="c.id"
+              class="flex cursor-pointer items-center gap-2 rounded-md border bg-surface p-3 text-sm"
+              :style="{ borderColor: 'var(--color-border)' }"
+            >
+              <input
+                type="checkbox"
+                :checked="form.categoryIds.includes(c.id)"
+                class="h-4 w-4 rounded"
+                @change="toggleCategory(c.id, ($event.target as HTMLInputElement).checked)"
+              />
+              <span>
+                {{ locale === 'ar' ? (c.nameAr || c.nameEn) : c.nameEn }}
+              </span>
+            </label>
           </div>
           <p class="mt-1 text-[11px] text-muted">
-            {{ locale === 'ar' ? 'اختر فئات ضمن نوع واحد (Normal أو VIP) فقط.' : 'Select categories within one type only (Normal or VIP).' }}
+            {{ locale === 'ar' ? 'اختر فئة واحدة أو أكثر لهذا المنتج.' : 'Select one or more categories for this product.' }}
           </p>
         </div>
         <div class="grid gap-4 sm:grid-cols-2">

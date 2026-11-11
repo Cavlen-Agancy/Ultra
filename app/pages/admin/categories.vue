@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { FolderTree, Image as ImageIcon, Loader2, Pencil, Plus, Search, Star, Trash2, X } from 'lucide-vue-next'
 
-definePageMeta({ layout: 'admin', middleware: 'admin-auth', requiredPermission: ['categories.manage', 'vip_categories.view'] })
+definePageMeta({ layout: 'admin', middleware: 'admin-auth', requiredPermission: 'categories.manage' })
 
 const { t, locale } = useI18n()
 const toast = useAdminToast()
@@ -63,7 +63,6 @@ const { data, refresh, pending } = await useAsyncData('admin-categories', () =>
   })}`),
   { watch: [page] },
 )
-const activeTab = ref((typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('tab') === 'vip') ? 'vip' : 'normal')
 
 const showModal = ref(false)
 const editing = ref<Category | null>(null)
@@ -289,29 +288,7 @@ const inputCls = 'h-10 w-full rounded-md border bg-transparent px-3 text-sm tran
       </template>
     </AdminPageHeader>
 
-    <div class="mb-4 flex gap-2">
-      <button
-        type="button"
-        class="rounded-md px-4 py-2 text-xs font-semibold transition-colors"
-        :class="activeTab === 'normal' ? 'bg-primary text-on-primary' : 'border border-border bg-surface text-text'"
-        @click="activeTab = 'normal'"
-      >
-        {{ locale === 'ar' ? 'أقسام عادية' : 'Normal Categories' }}
-      </button>
-      <button
-        type="button"
-        class="rounded-md px-4 py-2 text-xs font-semibold transition-colors"
-        :class="activeTab === 'vip' ? 'bg-primary text-on-primary' : 'border border-border bg-surface text-text'"
-        @click="activeTab = 'vip'"
-      >
-        {{ locale === 'ar' ? 'أقسام VIP' : 'VIP Categories' }}
-      </button>
-    </div>
-
-    <AdminVipCategories v-if="activeTab === 'vip'" />
-
-    <template v-if="activeTab === 'normal'">
-      <!-- Toolbar: Search & Counters -->
+    <!-- Toolbar: Search & Counters -->
     <form class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between" @submit.prevent="applySearch">
         <div class="relative w-full sm:max-w-xs">
           <Search class="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" aria-hidden="true" />
@@ -602,6 +579,5 @@ const inputCls = 'h-10 w-full rounded-md border bg-transparent px-3 text-sm tran
         </div>
       </div>
     </div>
-    </template>
   </div>
 </template>

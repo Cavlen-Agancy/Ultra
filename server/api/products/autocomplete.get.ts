@@ -7,7 +7,6 @@ export default defineEventHandler(async (event) => {
 
   const where = {
     isActive: true,
-    categories: { none: { category: { type: 'VIP' } } },
     OR: [
       { nameEn: { contains: q, mode: 'insensitive' as const } },
       { nameAr: { contains: q, mode: 'insensitive' as const } },

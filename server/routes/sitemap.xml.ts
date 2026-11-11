@@ -21,10 +21,7 @@ export default defineEventHandler(async (event) => {
       take: 5000,
     }),
     prisma.product.findMany({
-      where: {
-        isActive: true,
-        categories: { none: { category: { type: 'VIP' } } },
-      },
+      where: { isActive: true },
       select: { slug: true, updatedAt: true },
       take: 5000,
     }),

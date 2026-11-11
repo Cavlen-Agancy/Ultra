@@ -44,11 +44,6 @@ model AdminPermission {
 
 // ─── Catalog ───────────────────────────────────────────────────
 
-enum CategoryType {
-  NORMAL
-  VIP
-}
-
 model Category {
   id                 String   @id @default(cuid())
   nameAr             String
@@ -60,17 +55,12 @@ model Category {
   coverVideoUrl      String?
   featuredOnHomepage Boolean  @default(false)
   sortOrder          Int      @default(0)
-  type               CategoryType  @default(NORMAL)
-  vipPasswordHash    String?
-  vipAccessVersion   Int           @default(0)
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 
   products           Product[]
   productCategories  ProductCategory[]
-  vipAccessGrants    VipCategoryAccess[]
 
-  @@index([type])
   @@index([featuredOnHomepage])
 }
 
@@ -134,22 +124,6 @@ model ProductCategory {
   @@id([productId, categoryId])
   @@index([productId])
   @@index([categoryId])
-}
-
-model VipCategoryAccess {
-  id                    String   @id @default(cuid())
-  categoryId            String
-  sessionIdHash         String
-  passwordVersionAtGrant Int
-  expiresAt             DateTime
-  createdAt             DateTime @default(now())
-
-  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-
-  @@unique([categoryId, sessionIdHash])
-  @@index([categoryId, sessionIdHash])
-  @@index([expiresAt])
-  @@index([sessionIdHash])
 }
 
 model ProductAttribute {
