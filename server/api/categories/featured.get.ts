@@ -11,6 +11,7 @@ export default defineEventHandler(async () => {
       slug: true,
       coverImagePath: true,
       coverVideoUrl: true,
+      featuredOnHomepage: true,
     },
   })
 
@@ -29,6 +30,7 @@ export default defineEventHandler(async () => {
         slug: true,
         coverImagePath: true,
         coverVideoUrl: true,
+        featuredOnHomepage: true,
       },
     })
     categories = [...categories, ...extra]

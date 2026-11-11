@@ -355,7 +355,11 @@ model SiteSettings {
   taglineEn  String? @db.Text
   logoPath   String?
   faviconPath String?
-  heroImagePath String?
+  // Homepage hero slideshow. Slot 1 keeps the original single-image field;
+  // slots 2 and 3 complete the three-image set managed in admin settings.
+  heroImagePath  String?
+  heroImagePath2 String?
+  heroImagePath3 String?
 
   // Neutral placeholder palette. Replace with the real Ultra brand palette later.
   primaryDarkColor String @default("#111111")

@@ -17,9 +17,8 @@ const categories = computed(() => {
 
 const products = computed(() => productData.value?.products || [])
 
-const heroMedia = computed(() => {
-  const images: (string | null)[] = []
-  if (general.value?.heroImagePath) images.push(general.value.heroImagePath)
+const fallbackHeroMedia = computed(() => {
+  const images: string[] = []
   for (const category of categories.value) {
     if (category.coverImagePath) images.push(category.coverImagePath)
   }
@@ -28,6 +27,23 @@ const heroMedia = computed(() => {
   }
   return images
 })
+
+const configuredHeroMedia = computed(() => {
+  const images = general.value?.heroImagePaths
+  if (Array.isArray(images) && images.length) return images.filter(Boolean) as string[]
+  // Older cached settings payloads may only include the original single field.
+  return general.value?.heroImagePath ? [general.value.heroImagePath as string] : []
+})
+
+const heroMedia = computed(() => (
+  configuredHeroMedia.value.length
+    ? configuredHeroMedia.value
+    // No hero slots configured: keep the previous safe fallback imagery from
+    // category/product covers, capped at the three-slide hero length.
+    : fallbackHeroMedia.value.slice(0, 3)
+))
+
+const brandPrimaryImage = computed(() => configuredHeroMedia.value[0] || null)
 
 const headingLines = computed(() => [
   t('brand.name'),
@@ -43,33 +59,16 @@ const heroSubtitle = computed(() => (
 
 const heroCtaLabel = computed(() => (locale.value === 'ar' ? 'تسوق الهواتف' : 'Shop phones'))
 
-const quickLinks = computed(() => {
-  const result: Array<{ label: string, href: string, image: string | null | undefined, badge?: string | undefined }> = categories.value.map(category => ({
-    label: locale.value === 'ar' ? category.nameAr : category.nameEn,
-    href: localePath(`/products/${category.slug}`),
-    image: category.coverImagePath || null,
-    badge: category.featuredOnHomepage ? (locale.value === 'ar' ? 'جديد' : 'New') : undefined,
-  }))
+const featuredCategories = computed(() => (
+  categories.value.filter(category => category.featuredOnHomepage === true)
+))
 
-  if (result.length && result.length < 8) {
-    result.push({
-      label: locale.value === 'ar' ? 'كل المنتجات' : 'All products',
-      href: localePath('/products'),
-      image: null,
-      badge: locale.value === 'ar' ? 'جديد' : 'New',
-    })
-  }
-
-  if (result.length < 8) {
-    result.push({
-      label: locale.value === 'ar' ? 'Ultra Store' : 'Ultra Store',
-      href: localePath('/products'),
-      image: null,
-    })
-  }
-
-  return result.slice(0, 8)
-})
+const quickLinks = computed(() => featuredCategories.value.map(category => ({
+  label: locale.value === 'ar' ? category.nameAr : category.nameEn,
+  href: localePath(`/products/${category.slug}`),
+  image: category.coverImagePath || null,
+  badge: category.featuredOnHomepage ? (locale.value === 'ar' ? 'جديد' : 'New') : undefined,
+})).slice(0, 8))
 
 const statements = computed(() => [
   {
@@ -140,6 +139,7 @@ useHead(() => {
     />
 
     <AppQuickLinksRow
+      v-if="quickLinks.length"
       class="relative my-8"
       :items="quickLinks"
     />
@@ -180,7 +180,7 @@ useHead(() => {
           :paragraph="t('brand.longDesc')"
           :link-label="locale === 'ar' ? 'تصفح المتجر' : 'Read about us'"
           href="/products"
-          :primary-image="general?.heroImagePath || null"
+          :primary-image="brandPrimaryImage"
           :secondary-image="categories.find(c => c.coverImagePath)?.coverImagePath || null"
         />
       </div>

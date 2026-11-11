@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Image as ImageIcon, Trash2, UploadCloud } from 'lucide-vue-next'
+import { Check, Image as ImageIcon, Trash2, UploadCloud } from 'lucide-vue-next'
 
 const { locale } = useI18n()
 const canManageSettings = useAdminCan('settings.manage')
@@ -28,6 +28,20 @@ const {
 
 const uploadingType = ref<string | null>(null)
 const dragOver = ref<string | null>(null)
+const deletingHeroSlot = ref<HeroSlot | null>(null)
+
+type HeroSlot = 1 | 2 | 3
+
+const HERO_SLOTS = [
+  { slot: 1 as HeroSlot, field: 'heroImagePath' },
+  { slot: 2 as HeroSlot, field: 'heroImagePath2' },
+  { slot: 3 as HeroSlot, field: 'heroImagePath3' },
+] as const
+
+const heroSlots = computed(() => HERO_SLOTS.map(({ slot, field }) => ({
+  slot,
+  path: (data.value?.[field] as string | null | undefined) || null,
+})))
 
 // Non-blocking hints: flag EN-filled / AR-empty pairs so missing translations are noticed before publishing.
 const missingAr = computed(() => ({
@@ -37,13 +51,12 @@ const missingAr = computed(() => ({
 
 const missingArCount = computed(() => Object.values(missingAr.value).filter(Boolean).length)
 
-const uploadLabels: Record<string, { en: string, ar: string }> = {
+const uploadLabels: Record<'logo' | 'favicon', { en: string, ar: string }> = {
   logo: { en: 'Logo', ar: 'الشعار' },
   favicon: { en: 'Favicon', ar: 'أيقونة المتصفح' },
-  hero: { en: 'Hero image', ar: 'صورة الواجهة' },
 }
 
-async function uploadFileData(type: 'logo' | 'favicon' | 'hero', file: File) {
+async function uploadFileData(type: 'logo' | 'favicon', file: File) {
   uploadingType.value = type
   const label = uploadLabels[type][locale.value === 'ar' ? 'ar' : 'en']
   const fd = new FormData()
@@ -70,18 +83,85 @@ async function uploadFileData(type: 'logo' | 'favicon' | 'hero', file: File) {
   }
 }
 
-async function uploadFile(type: 'logo' | 'favicon' | 'hero', event: Event) {
+async function uploadFile(type: 'logo' | 'favicon', event: Event) {
   const file = (event.target as HTMLInputElement).files?.[0]
   ;(event.target as HTMLInputElement).value = ''
   if (!file) return
   await uploadFileData(type, file)
 }
 
-function onDrop(type: 'logo' | 'favicon' | 'hero', event: DragEvent) {
+function onDrop(type: 'logo' | 'favicon', event: DragEvent) {
   event.preventDefault()
   dragOver.value = null
   const file = event.dataTransfer?.files?.[0]
   if (file) void uploadFileData(type, file)
+}
+
+async function uploadHeroFileData(slot: HeroSlot, file: File) {
+  uploadingType.value = `hero-${slot}`
+  const label = locale.value === 'ar' ? `الصورة ${slot}` : `Hero image ${slot}`
+  const fd = new FormData()
+  fd.append('slot', String(slot))
+  fd.append('file', file)
+  try {
+    await $fetch('/api/admin/settings/hero', { method: 'POST', body: fd })
+    await refresh()
+    toast.success(
+      locale.value === 'ar' ? 'تم رفع الملف بنجاح' : 'Upload Successful',
+      locale.value === 'ar' ? `تم حفظ ${label}.` : `${label} saved.`,
+    )
+  }
+  catch (e: any) {
+    const msg = e?.data?.message || (locale.value === 'ar' ? 'فشل رفع الملف.' : 'Upload failed.')
+    statusMessage.value = msg
+    isError.value = true
+    toast.error(
+      locale.value === 'ar' ? 'فشل رفع الملف' : 'Upload Failed',
+      msg,
+    )
+  }
+  finally {
+    uploadingType.value = null
+  }
+}
+
+async function uploadHeroFile(slot: HeroSlot, event: Event) {
+  const file = (event.target as HTMLInputElement).files?.[0]
+  ;(event.target as HTMLInputElement).value = ''
+  if (!file) return
+  await uploadHeroFileData(slot, file)
+}
+
+function onHeroDrop(slot: HeroSlot, event: DragEvent) {
+  event.preventDefault()
+  dragOver.value = null
+  const file = event.dataTransfer?.files?.[0]
+  if (file) void uploadHeroFileData(slot, file)
+}
+
+async function deleteHeroImage(slot: HeroSlot) {
+  if (deletingHeroSlot.value) return
+  deletingHeroSlot.value = slot
+  try {
+    await $fetch('/api/admin/settings/hero', { method: 'DELETE', query: { slot } })
+    await refresh()
+    toast.success(
+      locale.value === 'ar' ? 'تم حذف الصورة' : 'Image removed',
+      locale.value === 'ar' ? `تم حذف الصورة ${slot}.` : `Hero image ${slot} removed.`,
+    )
+  }
+  catch (e: any) {
+    const msg = e?.data?.message || (locale.value === 'ar' ? 'فشل حذف الصورة.' : 'Failed to remove image.')
+    statusMessage.value = msg
+    isError.value = true
+    toast.error(
+      locale.value === 'ar' ? 'فشل حذف الصورة' : 'Remove Failed',
+      msg,
+    )
+  }
+  finally {
+    deletingHeroSlot.value = null
+  }
 }
 
 const deletingLogo = ref(false)
@@ -322,30 +402,88 @@ async function deleteLogo() {
       </div>
     </div>
 
-    <!-- Homepage Hero Image (existing functionality, kept compact) -->
+    <!-- Homepage Hero Slideshow: exactly three managed slots -->
     <div class="rounded-md border bg-surface p-4 shadow-xs" :style="{ borderColor: 'var(--color-border)' }">
       <h2 class="mb-1 font-heading text-base font-bold text-text">
-        {{ locale === 'ar' ? 'صورة الواجهة (Hero)' : 'Homepage Hero Image' }}
+        {{ locale === 'ar' ? 'صور الواجهة (Hero)' : 'Homepage Hero Slideshow' }}
       </h2>
       <p class="mb-3 text-xs text-muted">
-        {{ locale === 'ar' ? 'خلفية القسم الترحيبي العريضة (1920×800).' : 'Wide hero banner background (1920×800).' }}
+        {{ locale === 'ar' ? 'ارفع حتى ثلاث صور تظهر بالترتيب في عرض شرائح الواجهة (1920×800).' : 'Upload up to three images, shown in order in the homepage slideshow (1920×800).' }}
       </p>
-      <label
-        class="group flex cursor-pointer items-center gap-3 rounded-md border border-dashed p-3 transition-colors hover:border-primary hover:bg-surface dark:hover:bg-ink-800/50"
-        :style="{ borderColor: dragOver === 'hero' ? 'rgb(var(--accent) / 1)' : 'var(--color-border)' }"
-        @dragover.prevent="dragOver = 'hero'"
-        @dragleave="dragOver = null"
-        @drop="onDrop('hero', $event)"
-      >
-        <div class="flex h-12 w-20 shrink-0 items-center justify-center overflow-hidden rounded bg-border/40">
-          <img v-if="data?.heroImagePath" :src="data.heroImagePath" alt="" class="h-full w-full object-cover" loading="lazy" />
-          <ImageIcon v-else class="h-5 w-5 text-muted" aria-hidden="true" />
+
+      <div class="grid gap-3 sm:grid-cols-3">
+        <div
+          v-for="hero in heroSlots"
+          :key="hero.slot"
+          class="rounded-md border p-2 transition-colors"
+          :style="{ borderColor: dragOver === `hero-${hero.slot}` ? 'rgb(var(--accent) / 1)' : 'var(--color-border)' }"
+          @dragover.prevent="dragOver = `hero-${hero.slot}`"
+          @dragleave="dragOver = null"
+          @drop="onHeroDrop(hero.slot, $event)"
+        >
+          <div class="mb-2 flex items-center justify-between gap-2">
+            <span class="text-xs font-semibold text-text">
+              {{ locale === 'ar' ? `الشريحة ${hero.slot}` : `Slide ${hero.slot}` }}
+            </span>
+            <span v-if="hero.path" class="inline-flex items-center gap-1 text-[10px] font-medium text-success">
+              <Check class="h-3 w-3" aria-hidden="true" />
+              {{ locale === 'ar' ? 'محفوظة' : 'Saved' }}
+            </span>
+          </div>
+
+          <div class="relative flex aspect-[16/9] items-center justify-center overflow-hidden rounded bg-border/40">
+            <img
+              v-if="hero.path"
+              :src="hero.path"
+              :alt="locale === 'ar' ? `معاينة صورة الواجهة ${hero.slot}` : `Hero image ${hero.slot} preview`"
+              class="h-full w-full object-cover"
+              loading="lazy"
+            />
+            <div v-else class="flex flex-col items-center gap-1 text-muted">
+              <ImageIcon class="h-5 w-5" aria-hidden="true" />
+              <span class="text-[10px]">{{ locale === 'ar' ? 'لا توجد صورة' : 'No image' }}</span>
+            </div>
+            <div
+              v-if="uploadingType === `hero-${hero.slot}`"
+              class="absolute inset-0 flex items-center justify-center bg-black/55 text-[11px] font-semibold text-white"
+            >
+              {{ locale === 'ar' ? 'جاري الرفع…' : 'Uploading…' }}
+            </div>
+          </div>
+
+          <div class="mt-2 flex items-center gap-2">
+            <label
+              class="inline-flex h-8 flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-md border px-2 text-[11px] font-semibold text-text transition-colors hover:bg-primary/5"
+              :class="!canManageSettings ? 'pointer-events-none opacity-50' : ''"
+              :style="{ borderColor: 'var(--color-border)' }"
+            >
+              <UploadCloud class="h-3.5 w-3.5" aria-hidden="true" />
+              <span>{{ hero.path ? (locale === 'ar' ? 'استبدال' : 'Replace') : (locale === 'ar' ? 'رفع صورة' : 'Upload') }}</span>
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                class="hidden"
+                :disabled="!canManageSettings"
+                @change="uploadHeroFile(hero.slot, $event)"
+              />
+            </label>
+            <button
+              v-if="hero.path"
+              type="button"
+              :disabled="deletingHeroSlot !== null || !canManageSettings"
+              class="inline-flex h-8 items-center justify-center gap-1.5 rounded-md border border-error/30 px-2 text-[11px] font-semibold text-error transition-colors hover:bg-error/10 disabled:cursor-not-allowed disabled:opacity-50"
+              @click="deleteHeroImage(hero.slot)"
+            >
+              <Trash2 class="h-3.5 w-3.5" aria-hidden="true" />
+              <span>{{ deletingHeroSlot === hero.slot ? '…' : (locale === 'ar' ? 'حذف' : 'Remove') }}</span>
+            </button>
+          </div>
         </div>
-        <span class="text-xs font-semibold text-muted dark:text-muted">
-          {{ uploadingType === 'hero' ? (locale === 'ar' ? 'جاري الرفع…' : 'Uploading…') : (locale === 'ar' ? 'اضغط أو اسحب صورة الواجهة هنا' : 'Click or drag the hero image here') }}
-        </span>
-        <input type="file" accept="image/*" class="hidden" @change="uploadFile('hero', $event)" />
-      </label>
+      </div>
+
+      <p class="mt-2 text-[11px] text-muted">
+        {{ locale === 'ar' ? 'JPG أو PNG أو WEBP. الحد الأقصى 5 ميجابايت.' : 'JPG, PNG, or WEBP. Max 5MB.' }}
+      </p>
     </div>
 
     <!-- Inline Feedback Banner -->

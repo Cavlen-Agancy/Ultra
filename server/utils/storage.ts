@@ -30,7 +30,7 @@ function assertSafeId(id: string): void {
   }
 }
 
-function assertImagePart(part: { type?: string, data: Buffer }): void {
+export function assertImagePart(part: { type?: string, data: Buffer }): void {
   if (!part.type || !ALLOWED_MIME.has(part.type)) {
     throw createError({ statusCode: 400, statusMessage: 'Only JPG, PNG, WEBP images allowed' })
   }

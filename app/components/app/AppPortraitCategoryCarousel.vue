@@ -52,21 +52,36 @@ const titleStyles = [
   <div class="relative">
     <div class="container-editorial relative">
       <div
-        v-if="props.title || props.subtitle"
-        class="mb-8 max-w-2xl"
+        v-if="props.title || props.subtitle || displayedItems.length"
+        class="mb-8 flex items-start justify-between gap-4"
       >
-        <h2
-          v-if="props.title"
-          class="font-heading text-2xl font-bold tracking-tight text-black sm:text-[36px] sm:leading-[1.05]"
+        <div class="max-w-2xl">
+          <h2
+            v-if="props.title"
+            class="font-heading text-2xl font-bold tracking-tight text-black sm:text-[36px] sm:leading-[1.05]"
+          >
+            {{ props.title }}
+          </h2>
+          <p
+            v-if="props.subtitle"
+            class="mt-3 text-sm leading-6 text-[#5A5A5A] sm:text-base sm:leading-7"
+          >
+            {{ props.subtitle }}
+          </p>
+        </div>
+
+        <button
+          v-if="displayedItems.length"
+          type="button"
+          class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-black/10 bg-white text-black/45 shadow-sm transition-colors hover:text-brand-red focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-red"
+          :aria-label="locale === 'ar' ? 'الفئة التالية' : 'Scroll categories'"
+          @click="scrollNext"
         >
-          {{ props.title }}
-        </h2>
-        <p
-          v-if="props.subtitle"
-          class="mt-3 text-sm leading-6 text-[#5A5A5A] sm:text-base sm:leading-7"
-        >
-          {{ props.subtitle }}
-        </p>
+          <ChevronRight
+            class="h-6 w-6 rtl:rotate-180"
+            aria-hidden="true"
+          />
+        </button>
       </div>
 
       <div v-if="displayedItems.length" class="relative">
@@ -75,7 +90,7 @@ const titleStyles = [
             v-for="(item, index) in displayedItems"
             :key="item.slug"
             :to="localePath(`/products/${item.slug}`)"
-            class="group relative block w-[70vw] shrink-0 snap-start sm:w-[45%] lg:w-[23%]"
+            class="group relative block w-[calc(50%_-_0.5rem)] shrink-0 snap-start sm:w-[45%] lg:w-[23%]"
           >
             <div class="relative aspect-[4/5] w-full overflow-hidden rounded-lg bg-ink-soft">
               <img
@@ -103,22 +118,6 @@ const titleStyles = [
               </div>
             </div>
           </NuxtLink>
-        </div>
-
-        <div class="pointer-events-none absolute end-0 top-0 h-full w-24">
-          <div class="pointer-events-auto flex h-full items-center justify-end bg-gradient-to-l from-[#FDF8F7] via-white/90 to-transparent pe-2">
-            <button
-              type="button"
-              class="flex h-9 w-9 items-center justify-center border-none bg-transparent text-black/45 transition-colors hover:text-brand-red focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-red"
-              :aria-label="locale === 'ar' ? 'الفئة التالية' : 'Scroll categories'"
-              @click="scrollNext"
-            >
-              <ChevronRight
-                class="h-6 w-6 rtl:rotate-180"
-                aria-hidden="true"
-              />
-            </button>
-          </div>
         </div>
       </div>
     </div>
