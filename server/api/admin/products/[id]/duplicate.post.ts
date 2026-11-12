@@ -14,7 +14,7 @@ export default defineEventHandler(async (event) => {
       seo: true,
       documents: { orderBy: { sortOrder: 'asc' } },
       video: true,
-      categories: { include: { category: { select: { id: true, type: true } } } },
+      categories: { include: { category: { select: { id: true } } } },
     },
   })
 

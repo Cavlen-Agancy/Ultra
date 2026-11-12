@@ -8,12 +8,14 @@ const props = withDefaults(defineProps<{
   slides: HeroSlideMedia[]
   headingLines: string[]
   subtitle?: string
+  warranty?: string
   ctaLabel?: string
   ctaHref?: string
 }>(), {
   slides: () => [],
   headingLines: () => ['Ultra Store'],
   subtitle: '',
+  warranty: '',
   ctaLabel: '',
   ctaHref: '/products',
 })
@@ -210,6 +212,12 @@ onBeforeUnmount(() => {
         >
           <span v-for="line in props.headingLines" :key="line" class="block">{{ line }}</span>
         </h1>
+        <p
+          v-if="props.warranty"
+          class="mt-3 max-w-xl text-xs leading-5 text-white/75 sm:text-sm sm:leading-6"
+        >
+          {{ props.warranty }}
+        </p>
         <p
           v-if="props.subtitle"
           class="mt-4 max-w-xl text-sm leading-6 text-white/80 sm:text-base sm:leading-7"

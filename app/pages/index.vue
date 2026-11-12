@@ -69,17 +69,9 @@ const brandPrimaryImage = computed(() => {
   return first?.desktop || first?.mobile || null
 })
 
-const headingLines = computed(() => [
-  t('brand.name'),
-  locale.value === 'ar' ? 'ترقية' : 'Upgrade',
-  locale.value === 'ar' ? 'طريقة الاتصال' : 'The way you connect',
-])
+const headingLines = computed(() => [t('home.heroTitleLine1')])
 
-const heroSubtitle = computed(() => (
-  locale.value === 'ar'
-    ? 'جودة عالية، توصيل سريع، وطريقة شراء بسيطة.'
-    : 'Great quality, fast delivery, and a calm checkout.'
-))
+const heroWarranty = computed(() => t('home.heroWarranty'))
 
 const heroCtaLabel = computed(() => (locale.value === 'ar' ? 'تسوق الهواتف' : 'Shop phones'))
 
@@ -157,7 +149,7 @@ useHead(() => {
     <AppHeroSplitSlider
       :slides="heroSlides"
       :heading-lines="headingLines"
-      :subtitle="heroSubtitle"
+      :warranty="heroWarranty"
       :cta-label="heroCtaLabel"
       cta-href="/products"
     />

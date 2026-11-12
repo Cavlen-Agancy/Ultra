@@ -64,8 +64,6 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 403, statusMessage: 'Forbidden' })
   }
 
-  const [category] = categoryRows
-
   const price = Number(body.price)
   if (!Number.isFinite(price) || price < 0) throw createError({ statusCode: 400, statusMessage: 'Valid price is required' })
   const compareAt = body.compareAtPrice === undefined || body.compareAtPrice === '' || body.compareAtPrice === null
